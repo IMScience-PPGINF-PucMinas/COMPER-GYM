@@ -5,7 +5,6 @@ import getpass
 from comper.agents.train_agent import Agent
 from comper.config.optimize import TensorFlowSettings
 
-
 @click.command()
 @click.option("--rom",type=str, default="Hopper-v2",show_default=True)
 @click.option("--logdir", type=str, default='dev',show_default=True)

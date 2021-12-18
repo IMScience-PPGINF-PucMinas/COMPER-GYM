@@ -23,11 +23,12 @@ class MlpNet(object):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0003)
     
     def create(self,input_shape,output_dim=3):
+        last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         self.mlp = tf.keras.Sequential([            
             tf.keras.layers.Dense(256,input_shape=input_shape,name="Dense1"),            
             tf.keras.layers.Dense(256,name="Dense2"),
             tf.keras.layers.Flatten(name="Flatten"),
-            tf.keras.layers.Dense(output_dim,activation=None,name="DenseOut")
+            tf.keras.layers.Dense(output_dim,activation=None,name="DenseOut",kernel_initializer=last_init)
         ])   
 
     def compile_model(self):

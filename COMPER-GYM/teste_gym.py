@@ -10,6 +10,16 @@ def run(task,max_steps=1000,render=False):
     print("Action Space:", env.action_space)
     #print("Observation Space: ",env.observation_space)
     print ("Observation size",env.observation_space)
+    num_states = env.observation_space.shape[0]
+    print("Size of State Space ->  {}".format(num_states))
+    num_actions = env.action_space.shape[0]
+    print("Size of Action Space ->  {}".format(num_actions))
+
+    upper_bound = env.action_space.high[0]
+    lower_bound = env.action_space.low[0]
+
+    print("Max Value of Action ->  {}".format(upper_bound))
+    print("Min Value of Action ->  {}".format(lower_bound))
 
     done = False
     step =0
