@@ -1,7 +1,6 @@
 import keras
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
+from keras.layers import Dense,LSTM
 import tensorflow as tf
 import os
 
@@ -12,9 +11,7 @@ class RNN(object):
         self.optimizer = optimizer
         self.outputdim = output_dim
         self.rms_prop_optimizer =tf.compat.v1.train.RMSPropOptimizer(learning_rate=0.00025) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
-       
-        self.lstm = Sequential()        
-        #self.lstm.add(LSTM(64,return_sequences=True,stateful=False,input_shape=(inputshapex,inputshapey),batch_size=batch_size)) 
+        self.lstm = Sequential()                
         self.lstm.add(LSTM(64,return_sequences=True,stateful=False,input_shape=(inputshapex,inputshapey),activation='tanh'))
         self.lstm.add(LSTM(32,return_sequences=True,activation='tanh'))
         self.lstm.add(LSTM(32,activation='tanh'))
