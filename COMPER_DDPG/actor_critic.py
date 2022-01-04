@@ -81,6 +81,7 @@ class Critic(BaseActorCritic):
     
     def create(self,num_states,num_actions):
         # State as input
+        last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         state_input = layers.Input(shape=(num_states),name="critic_st_input")
         state_out = layers.Dense(16, activation="relu",name="critic_st_dense1")(state_input)
         state_out = layers.Dense(32, activation="relu",name="critic_st_dense2")(state_out)
@@ -94,7 +95,7 @@ class Critic(BaseActorCritic):
 
         out = layers.Dense(256, activation="relu",name="critic_dense2")(concat)
         out = layers.Dense(256, activation="relu",name="critic_dense3")(out)
-        outputs = layers.Dense(1,name="critic_output")(out)
+        outputs = layers.Dense(1,kernel_initializer=last_init,name="critic_output")(out)
 
         # Outputs single value for give state-action
         self.model = tf.keras.Model([state_input, action_input], outputs)

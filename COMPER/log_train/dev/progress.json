@@ -1,2 +1,0 @@
-{"Count": 0, "Rom": "Hopper-v2", "Time": "28-12-2021 23:19:43", "Itr": 9, "TMCount": 8, "RTMCount": 0, "Eps": 0.9995526643116573, "Episodes": 0, "EndEp": false, "CurrEpRewardSum": 9.485586706013246, "EpRewardsSum": 9.485586706013246, "AvgEpReturn": NaN, "TDE": NaN}
-{"Count": 1, "Rom": "Hopper-v2", "Time": "28-12-2021 23:19:45", "Itr": 19, "TMCount": 32, "RTMCount": 0, "Eps": 0.9990556246579432, "Episodes": 0, "EndEp": false, "CurrEpRewardSum": 29.905024769018752, "EpRewardsSum": 29.905024769018745, "AvgEpReturn": NaN, "TDE": 1.7040410304706568}

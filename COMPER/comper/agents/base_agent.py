@@ -34,11 +34,11 @@ class BaseAgent(object):
             raise ex.ExceptionDisplayScreen(display_screen)   
     
     def __set_nets_param_dir(self,nets_param_dir=""):
-        self.nets_param_dir =  "./netparams/"+nets_param_dir
+        self.nets_param_dir =  "./netparams_comper/"+nets_param_dir
         
 
     def __set_logs_dir(self,log_dir):
-        base_dir = "./log_" 
+        base_dir = "./log_comper/" 
         if self.run_type==param.RunType.TRAIN:
             base_dir = base_dir+"train/"        
         elif self.run_type==param.RunType.TEST:
@@ -71,23 +71,7 @@ class BaseAgent(object):
         ft.T_IDX_DONE = ft.T_IDX_Q+1
         ft.T_LENGTH = ft.ST_L+1+1+ft.ST_L+1+1
         ft.T_N_IDX= ft.T_LENGTH-1
-        temp=0
-         
-    #def config_environment(self,):        
-        #self.env = gym.make(self.rom_name)        
-        #self.actions = self.env.action_space
-        #self.nActions = self.actions.sample().shape[0]
-        #ft.ST_L= self.env.observation_space.shape[0]
-        #ft.T_IDX_ST_1 = [0,ft.ST_L]
-        #ft.T_IDX_A    = [ft.ST_L,(ft.ST_L+self.nActions)]
-        #ft.T_IDX_R    = ft.T_IDX_A[1]
-        #ft.T_IDX_ST   = [ft.T_IDX_R+1,(ft.T_IDX_R+1+ft.ST_L)]
-        #ft.T_IDX_Q    = ft.T_IDX_ST[1]
-        #ft.T_IDX_DONE = ft.T_IDX_Q+1
-        #ft.T_LENGTH = ft.ST_L+self.nActions+1+ft.ST_L+1+1
-        temp=0
         
-    
 class BaseTrainAgent(BaseAgent):
     def __init__(self,rom_name,maxtotalframes,frames_ep_decay,train_frequency,update_target_frequency,learning_start_iter,log_frequency,
                  log_dir,nets_param_dir,memory_dir,save_states_frq,persist_memories,save_networks_weigths=True,

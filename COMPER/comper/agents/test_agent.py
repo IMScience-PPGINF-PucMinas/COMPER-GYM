@@ -20,7 +20,7 @@ class TestAgent(BaseTestAgent):
     def __get_env_state(self):
         st_1 = self.env.getScreenGrayscale()
         st_1 = self.statePreprocessor.gray_preprocess_obs_ram(st_1)
-        st_1 = np.array(np.divide(st_1,255))
+        st_1 = np.array(np.divide(st_1))
         return st_1
         
     def __agente_step(self):

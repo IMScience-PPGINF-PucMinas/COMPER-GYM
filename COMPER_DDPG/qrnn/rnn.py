@@ -13,7 +13,7 @@ class RNN(object):
         
         
         self.lstm = tf.keras.Sequential()                                
-        self.lstm.add(layers.LSTM(units=64,return_sequences=True,stateful=False,activation='tanh'))
+        self.lstm.add(layers.LSTM(units=64,return_sequences=True,input_shape=(inputshapex,inputshapey),stateful=False,activation='tanh'))
         self.lstm.add(layers.LSTM(units=32,return_sequences=True,activation='tanh'))
         self.lstm.add(layers.LSTM(units=32,activation='tanh'))
         self.lstm.add(layers.Dense(units=self.outputdim))      

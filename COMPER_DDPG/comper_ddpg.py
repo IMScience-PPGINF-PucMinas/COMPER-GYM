@@ -10,41 +10,27 @@ from memory.rtm.reduced_transitions_memory import ReducedTransitionsMemory as RT
 from config.transitions import FrameTransition as ft 
 from qrnn.q_lstm_gscale import QLSTMGSCALE
 from environment.env import GymEnv
+from data import logger
+from datetime import datetime
+import os
+from tensorflow.keras import backend as K
+
+
 tf.enable_eager_execution()
 
 
-env = GymEnv("Pendulum-v1")
+task_name = "Pendulum-v1"
+env = GymEnv(task_name)
 
 
-class Buffer:
-    def __init__(self, buffer_capacity=100000, batch_size=64):
-        # Number of "experiences" to store at max
-        self.buffer_capacity = buffer_capacity
-        # Num of tuples to train on.
-        self.batch_size = batch_size
+base_log_dir = "./log_comper_ddpg/train/"
+logger.session(base_log_dir).__enter__()
 
-        # Its tells us num of times record() was called.
-        self.buffer_counter = 0
+def log(log_data_dict):
+    for k, v in log_data_dict:
+        logger.logkv(k, v)
+    logger.dumpkvs()
 
-        # Instead of list of tuples as the exp.replay concept go
-        # We use different np.arrays for each tuple element
-        self.state_buffer = np.zeros((self.buffer_capacity, env.num_states))
-        self.action_buffer = np.zeros((self.buffer_capacity, env.num_actions))
-        self.reward_buffer = np.zeros((self.buffer_capacity, 1))
-        self.next_state_buffer = np.zeros((self.buffer_capacity, env.num_states))
-
-    # Takes (s,a,r,s') obervation tuple as input
-    def record(self, obs_tuple):
-        # Set index to zero if buffer_capacity is exceeded,
-        # replacing old records
-        index = self.buffer_counter % self.buffer_capacity
-
-        self.state_buffer[index] = obs_tuple[0]
-        self.action_buffer[index] = obs_tuple[1]
-        self.reward_buffer[index] = obs_tuple[2]
-        self.next_state_buffer[index] = obs_tuple[3]
-
-        self.buffer_counter += 1
 
 def config_memories():               
     tm = TM(max_size=100000,name="tm", memory_dir="./")
@@ -57,11 +43,12 @@ def config_memories():
 @tf.function
 def update_actor_critic_nets(state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
     # Training and updating Actor & Critic networks.
-    # See Pseudo Code.
+    # See Pseudo Code.    
     with tf.GradientTape() as tape:
         #target_actions = target_actor.model(next_state_batch, training=True)
-        #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)
-        y = reward_batch + gamma * target_predicted
+        #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
+        y = reward_batch + gamma * qt.lstm.lstm(target_predicted, training=True)
+        #y = reward_batch + gamma * target_predicted
 
         critic_value = critic_model.model([state_batch, action_batch], training=True)
         critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
@@ -111,18 +98,13 @@ def comput_loss_and_update():
     reward_batch = tf.cast(reward_batch, dtype=tf.float32)
     next_state_batch = tf.convert_to_tensor(st)
     transitions = transitions_batch[:,:-2]            
-    target_predicted = qt.predict(transitions)
-
-    update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch, target_predicted)
+    #target_predicted = qt.predict(transitions)
+    transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
+    update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch,transitions)
 
     critic_value = critic_model.model([state_batch, action_batch], training=True).numpy()
     for i in range(len(st_1)):                 
         tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
-
-    
-
-   
-
 
 # This update target parameters slowly
 # Based on rate `tau`, which is much less than one.
@@ -141,7 +123,6 @@ target_actor = actor_critic.get_actor(env.num_states,env.upper_bound)
 # Making the weights equal initially
 target_actor.model.set_weights(actor_model.model.get_weights())
 #target_critic.model.set_weights(critic_model.model.get_weights())
-
 
 tm, rtm = config_memories()
 transitin_size = int((2*env.num_states + env.num_actions + 1))
@@ -169,15 +150,21 @@ ep_reward_list = []
 # To store average reward history of last few episodes
 avg_reward_list = []
 
+
+
+
 # Takes about 4 min to train
+log_itr=0
+logFrequency=100
+trainQTFreqquency=100    
+learningStartIter=1
 for ep in range(total_episodes):
 
     prev_state = env.reset()
     episodic_reward = 0
-    itr = 1
-    trainQTFreqquency=10
-    learningStartIter=1
-    while True:
+    itr = 1   
+    run =True
+    while run:
         itr+=1
         # Uncomment this to see the Actor in action
         # But not in a python notebook.
@@ -201,13 +188,26 @@ for ep in range(total_episodes):
         if (itr % trainQTFreqquency == 0 and itr > learningStartIter):
             qt.train_q_prediction(n_epochs=5)
             
-        
-
         # End this episode when `done` is True
         if done:
-            break
-
+            run=False
         prev_state = state
+
+        if(((itr+1) % logFrequency == 0) or done):
+            avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0            
+            log_itr+=1
+            now = datetime.now()        
+            dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+            log_data_dict =[
+            ('Count',log_itr),
+            ('Task',task_name),
+            ('Time',dt_string),
+            ('Ep', ep),
+            ('Itr', itr),
+            ('Rew', episodic_reward),
+            ('AvgEpRew', (episodic_reward/itr)),
+            ('AvgTrialRew', np.mean(avg_trial_rew))]
+            log(log_data_dict) 
 
     ep_reward_list.append(episodic_reward)
 
@@ -215,6 +215,13 @@ for ep in range(total_episodes):
     avg_reward = np.mean(ep_reward_list[-40:])
     print("Episode * {} * Avg Reward is ==> {}".format(ep, avg_reward))
     avg_reward_list.append(avg_reward)
+
+
+
+
+
+
+
 
 # Plotting graph
 # Episodes versus Avg. Rewards
