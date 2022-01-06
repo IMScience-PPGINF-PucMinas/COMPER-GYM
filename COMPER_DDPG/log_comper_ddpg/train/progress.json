@@ -17,3 +17,5 @@
 {"Count": 17, "Task": "Pendulum-v1", "Time": "06-01-2022 14:57:02", "TMCount": 1196, "RTMCount": 1048, "Ep": 5, "Itr": 200, "Rew": -1510.7099765613318, "AvgEpRew": -7.553549882806659, "AvgTrialRew": -1317.531558606297}
 {"Count": 18, "Task": "Pendulum-v1", "Time": "06-01-2022 14:59:43", "TMCount": 197, "RTMCount": 1132, "Ep": 5, "Itr": 201, "Rew": -1517.1944540267555, "AvgEpRew": -7.548231114560973, "AvgTrialRew": -1317.531558606297}
 {"Count": 19, "Task": "Pendulum-v1", "Time": "06-01-2022 15:00:17", "TMCount": 1294, "RTMCount": 1132, "Ep": 6, "Itr": 100, "Rew": -603.4072206078511, "AvgEpRew": -6.034072206078511, "AvgTrialRew": -1350.80870784304}
+{"Count": 20, "Task": "Pendulum-v1", "Time": "06-01-2022 15:03:40", "TMCount": 1394, "RTMCount": 1227, "Ep": 6, "Itr": 200, "Rew": -1248.3549984028393, "AvgEpRew": -6.2417749920141965, "AvgTrialRew": -1350.80870784304}
+{"Count": 21, "Task": "Pendulum-v1", "Time": "06-01-2022 15:06:48", "TMCount": 395, "RTMCount": 1322, "Ep": 6, "Itr": 201, "Rew": -1256.1309974707694, "AvgEpRew": -6.249407947615769, "AvgTrialRew": -1350.80870784304}
