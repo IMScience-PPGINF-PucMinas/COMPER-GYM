@@ -47,7 +47,7 @@ def update_actor_critic_nets(state_batch, action_batch, reward_batch, next_state
     with tf.GradientTape() as tape:
         #target_actions = target_actor.model(next_state_batch, training=True)
         #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
-        y = reward_batch + gamma * qt.lstm.lstm(target_predicted, training=True)
+        y = reward_batch + gamma * qt.lstm.lstm(target_predicted)
         #y = reward_batch + gamma * target_predicted
 
         critic_value = critic_model.model([state_batch, action_batch], training=True)
@@ -67,6 +67,29 @@ def update_actor_critic_nets(state_batch, action_batch, reward_batch, next_state
     actor_optimizer.apply_gradients(
         zip(actor_grad, actor_model.model.trainable_variables)
     )
+
+@tf.function
+def update_actor_critic_nets2(state_batch, action_batch, reward_batch, next_state_batch):
+    # Training and updating Actor & Critic networks.
+    # See Pseudo Code.
+    with tf.GradientTape() as tape:
+        target_actions = target_actor.model(next_state_batch, training=True)
+        y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)
+        critic_value = critic_model.model([state_batch, action_batch], training=True)
+        critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+    critic_grad = tape.gradient(critic_loss, critic_model.model.trainable_variables)
+    critic_optimizer.apply_gradients(zip(critic_grad, critic_model.model.trainable_variables))
+
+    with tf.GradientTape() as tape:
+        actions = actor_model.model(state_batch, training=True)
+        critic_value = critic_model.model([state_batch, actions], training=True)
+        # Used `-value` as we want to maximize the value given
+        # by the critic for our actions
+        actor_loss = -tf.math.reduce_mean(critic_value)
+
+    actor_grad = tape.gradient(actor_loss, actor_model.model.trainable_variables)
+    actor_optimizer.apply_gradients(zip(actor_grad, actor_model.model.trainable_variables))
 
 def _get_transition_components(transitions):
         st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
@@ -104,6 +127,51 @@ def comput_loss_and_update():
     for i in range(len(st_1)):                 
         tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
 
+def comput_loss_and_update2():
+    transitions_batch=[]   
+    if(rtm. __len__()>0):
+        transitions_batch = rtm.sample_transitions_batch(64)
+    else:
+        transitions_batch = tm.sample_transitions_batch(64)
+    
+    st_1,a,r,st,q,done = _get_transition_components(transitions_batch)
+    a = np.array(a)
+    a = a.reshape(a.shape[0],1)
+    r = np.array(r)
+    r = r.reshape(r.shape[0],1)
+    state_batch = tf.convert_to_tensor(st_1)
+    action_batch = tf.convert_to_tensor(a)
+    reward_batch = tf.convert_to_tensor(r)
+    reward_batch = tf.cast(reward_batch, dtype=tf.float32)
+    next_state_batch = tf.convert_to_tensor(st)
+
+    update_actor_critic_nets2(state_batch, action_batch, reward_batch,next_state_batch)
+
+    transitions = transitions_batch[:,:-2]            
+    #target_predicted = qt.predict(transitions)
+    transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
+    update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
+
+    critic_value = critic_model.model([state_batch, action_batch], training=True).numpy()
+    for i in range(len(st_1)):                 
+        tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
+
+
+def update_critic_target(state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
+    with tf.GradientTape() as tape:
+        #target_actions = target_actor.model(next_state_batch, training=True)
+        #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
+        y = reward_batch + gamma * qt.lstm.lstm(target_predicted)
+        #y = reward_batch + gamma * target_predicted
+
+        critic_value = critic_model.model([state_batch, action_batch], training=True)
+        critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+    critic_grad = tape.gradient(critic_loss, critic_model.model.trainable_variables)
+    critic_optimizer.apply_gradients(zip(critic_grad, critic_model.model.trainable_variables))
+    
+
+
 # This update target parameters slowly
 # Based on rate `tau`, which is much less than one.
 @tf.function
@@ -116,11 +184,11 @@ actor_model = actor_critic.get_actor(env.num_states,env.upper_bound)
 critic_model = actor_critic.get_critic(env.num_states,env.num_actions)
 
 target_actor = actor_critic.get_actor(env.num_states,env.upper_bound)
-#target_critic = actor_critic.get_critic(env.num_states,env.num_actions)
+target_critic = actor_critic.get_critic(env.num_states,env.num_actions)
 
 # Making the weights equal initially
 target_actor.model.set_weights(actor_model.model.get_weights())
-#target_critic.model.set_weights(critic_model.model.get_weights())
+target_critic.model.set_weights(critic_model.model.get_weights())
 
 tm, rtm = config_memories()
 transitin_size = int((2*env.num_states + env.num_actions + 1))
@@ -181,7 +249,7 @@ for ep in range(total_episodes):
         tm.add_transition(prev_state,action,reward,state,q,done)
         episodic_reward += reward       
 
-        comput_loss_and_update()
+        comput_loss_and_update2()
         update_target(target_actor.model.variables, actor_model.model.variables, tau)
         #update_target(target_critic.model.variables, critic_model.model.variables, tau)
         count+=1
