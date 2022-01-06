@@ -46,7 +46,9 @@ class TransitionsMemory(BaseTransitionsMemory):
         _t = t[:-2]
         exist,similar_t_key = self.__exist_simillar_transition(_t)
         if(not exist):
-            similar_t_key =self.faissidx.add_transition(_t)         
+            similar_t_key =self.faissidx.add_transition(_t)
+        elif(exist):
+            temp =0         
         self.t_set.add(t,similar_t_key)
 
     def load_transitions_batch_as_features_array(self,bsize=1000,include_done_singnal=False,normalizeFromMean=False):

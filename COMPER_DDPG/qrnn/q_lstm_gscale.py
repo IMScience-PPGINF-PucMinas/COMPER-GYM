@@ -131,7 +131,7 @@ class QLSTMGSCALE(object):
 
     # Called in train_q_prediction: step 3
     def get_train_test_sets(self, data):
-        n_train = int(((60 * self.transitions_real_batch_size)/100))
+        n_train = int(((80 * self.transitions_real_batch_size)/100))
         train = data[0:n_train, :]
         test = data[n_train:, :]        
         train_X = train[:, :-1]
@@ -171,6 +171,16 @@ class QLSTMGSCALE(object):
             print('Test RMSE: %.3f' % rmse)
         return rmse
     
+    def val_rmse(self,x,y):
+        _y = self.lstm.predict(x)
+        rmse = math.sqrt(mean_squared_error(y, _y))
+        self.train_val_rmse_history.append(rmse)
+        if(self.verbose):
+            print('Test RMSE: %.3f' % rmse)
+        return rmse
+
+
+    
     def train_q_prediction(self, n_epochs=15, b_size=16):
         self.training = True
         self.trainPredictionCount += 1
@@ -192,7 +202,8 @@ class QLSTMGSCALE(object):
             vlh = history.history['val_loss']
             self.train_loss_history.extend(tlh)
             self.train_val_loss_history.extend(vlh)            
-            self.train_q_prediction_evaluate(test_X,test_y)
+            #self.train_q_prediction_evaluate(test_X,test_y)
+            self.val_rmse(test_X,test_y)
 
     def predict(self, input_transitions):
         self.training = False

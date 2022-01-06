@@ -54,9 +54,7 @@ def update_actor_critic_nets(state_batch, action_batch, reward_batch, next_state
         critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
     critic_grad = tape.gradient(critic_loss, critic_model.model.trainable_variables)
-    critic_optimizer.apply_gradients(
-        zip(critic_grad, critic_model.model.trainable_variables)
-    )
+    critic_optimizer.apply_gradients(zip(critic_grad, critic_model.model.trainable_variables))
 
     with tf.GradientTape() as tape:
         actions = actor_model.model(state_batch, training=True)
@@ -128,7 +126,7 @@ tm, rtm = config_memories()
 transitin_size = int((2*env.num_states + env.num_actions + 1))
 qt = QLSTMGSCALE(transitions_memory=tm,reduced_transitions_memory=rtm,
                               inputshapex=1,inputshapey=transitin_size,outputdim=env.num_actions,
-                              verbose=False,transition_batch_size=64,netparamsdir='dev',
+                              verbose=True,transition_batch_size=1000,netparamsdir='dev',
                               target_optimizer="rmsprop",log_dir='dev')
 
 
@@ -158,6 +156,7 @@ log_itr=0
 logFrequency=100
 trainQTFreqquency=100    
 learningStartIter=1
+count=0
 for ep in range(total_episodes):
 
     prev_state = env.reset()
@@ -185,15 +184,17 @@ for ep in range(total_episodes):
         comput_loss_and_update()
         update_target(target_actor.model.variables, actor_model.model.variables, tau)
         #update_target(target_critic.model.variables, critic_model.model.variables, tau)
-        if (itr % trainQTFreqquency == 0 and itr > learningStartIter):
-            qt.train_q_prediction(n_epochs=5)
-            
+        count+=1
+        
+        if ((count==6 or count % trainQTFreqquency == 0) and itr > learningStartIter):
+            qt.train_q_prediction(n_epochs=15)
+
         # End this episode when `done` is True
-        if done:
+        if done:            
             run=False
         prev_state = state
 
-        if(((itr+1) % logFrequency == 0) or done):
+        if((itr % logFrequency == 0) or done):
             avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0            
             log_itr+=1
             now = datetime.now()        
@@ -202,6 +203,8 @@ for ep in range(total_episodes):
             ('Count',log_itr),
             ('Task',task_name),
             ('Time',dt_string),
+            ('TMCount',tm.__len__()),
+            ('RTMCount',rtm.__len__()),
             ('Ep', ep),
             ('Itr', itr),
             ('Rew', episodic_reward),

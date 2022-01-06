@@ -13,11 +13,11 @@ class RNN(object):
         
         
         self.lstm = tf.keras.Sequential()                                
-        self.lstm.add(layers.LSTM(units=64,return_sequences=True,input_shape=(inputshapex,inputshapey),stateful=False,activation='tanh'))
+        self.lstm.add(layers.LSTM(units=32,return_sequences=True,input_shape=(inputshapex,inputshapey),stateful=False,activation='tanh'))
         self.lstm.add(layers.LSTM(units=32,return_sequences=True,activation='tanh'))
         self.lstm.add(layers.LSTM(units=32,activation='tanh'))
-        self.lstm.add(layers.Dense(units=self.outputdim))      
-        self.lstm.add(layers.Dense(units=1))#self.lstm.add(Dense(2,activation='softmax'))        
+        self.lstm.add(layers.Dense(units=256))                              
+        self.lstm.add(layers.Dense(units=1))       
 
     def compile(self,reload_weights_if_exists=True): #adam
         loaded = self.load_weights() 
