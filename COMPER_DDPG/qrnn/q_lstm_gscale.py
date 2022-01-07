@@ -19,7 +19,7 @@ class QLSTMGSCALE(object):
         self.train_loss_history = list()
         self.train_val_loss_history = list()
         self.train_val_rmse_history = list()
-        self.scaler = MinMaxScaler(feature_range=(0, 1))        
+        self.scaler = MinMaxScaler(feature_range=(-1, 1))        
         self.lstm_bacth_size = 32
         self.transitions_default_batch_size = transition_batch_size
         self.transitions_real_batch_size = 0
@@ -74,9 +74,15 @@ class QLSTMGSCALE(object):
 
         try:
             transition_features = self.transitions_memory.load_transitions_batch_as_features_array(bsize=self.transitions_default_batch_size,normalizeFromMean=True)
-            self.transitions_real_batch_size = len(transition_features)
-                      
+            
+            values = np.array(transition_features[:,-1])
+            
+            values = values[:,np.newaxis]
+            
+            transition_features = transition_features[:,:-1]
             transition_features = self.scaler.fit_transform(transition_features)
+            transition_features = np.concatenate((transition_features,values),axis=1)
+            
             
             transformed = self.transform_transitions(transition_features, 1, 1)           
             if(self.verbose):                
@@ -149,7 +155,23 @@ class QLSTMGSCALE(object):
             print("\n after reshape train_X and test_X")
             print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
-        return train_X, train_y, test_X, test_y   
+        return train_X, train_y, test_X, test_y
+
+    def get_train(self, data):             
+        train_X = data[:, :-1]
+        train_y = data[:, -1]            
+        if(self.verbose):
+            print("\n (train_X, train_y)")
+            print(train_X.shape, train_y.shape)
+        # reshape to 3d to lstm
+        train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
+        
+
+        if(self.verbose):
+            print("\n after reshape train_X and test_X")
+            print(train_X.shape, train_y.shape)
+
+        return train_X, train_y    
     
     def train_q_prediction_evaluate(self, test_X, test_y):
         # make a prediction
@@ -173,7 +195,7 @@ class QLSTMGSCALE(object):
     
     def val_rmse(self,x,y):
         _y = self.lstm.predict(x)
-        rmse = math.sqrt(mean_squared_error(y, _y))
+        rmse = mean_squared_error(y, _y)
         self.train_val_rmse_history.append(rmse)
         if(self.verbose):
             print('Test RMSE: %.3f' % rmse)
@@ -196,6 +218,20 @@ class QLSTMGSCALE(object):
         self.LogLstmTrainHistoy()
         self.reduce_transition_memory()
     
+    def train_q_prediction_withou_validation(self, n_epochs=15, b_size=16):
+        self.training = True
+        self.trainPredictionCount += 1
+        
+        transition_features = self.__load_transition_featrues_from_memory()           
+        
+        train_X, train_y= self.get_train(transition_features.values)
+        
+        history = self.lstm.fit(train_X, train_y, epochs=n_epochs, batch_size=b_size, verbose=self.verbose, shuffle=False)
+        
+        self.prepare_train_log_withou_val(history,train_X,train_y)
+        self.LogLstmTrainHistoy()
+        self.reduce_transition_memory()
+    
     def prepare_train_log(self,history,test_X,test_y):
         if(self.logTrain):
             tlh = history.history['loss']
@@ -204,6 +240,16 @@ class QLSTMGSCALE(object):
             self.train_val_loss_history.extend(vlh)            
             #self.train_q_prediction_evaluate(test_X,test_y)
             self.val_rmse(test_X,test_y)
+    
+    def prepare_train_log_withou_val(self,history,test_X,test_y):
+        if(self.logTrain):
+            tlh = history.history['loss']
+            #vlh = history.history['val_loss']
+            self.train_loss_history.extend(tlh)
+            #self.train_val_loss_history.extend(0)            
+            #self.train_q_prediction_evaluate(test_X,test_y)
+            self.val_rmse(test_X,test_y)
+
 
     def predict(self, input_transitions):
         self.training = False
@@ -238,7 +284,8 @@ class QLSTMGSCALE(object):
             for i in range(0, len(self.train_loss_history)):
                 lstm_logger.logkv("TrainCount", self.trainPredictionCount)
                 lstm_logger.logkv('MeanTrainLoss', self.train_loss_history[i])
-                lstm_logger.logkv('MeanValidationLoss', self.train_val_loss_history[i])
+                if(len(self.train_val_loss_history)>0):
+                    lstm_logger.logkv('MeanValidationLoss', self.train_val_loss_history[i])
 
                 if(i>=(len(self.train_loss_history)-1)):
                     lstm_logger.logkv("FinalMeanRMSE",self.train_val_rmse_history[0])
@@ -248,5 +295,6 @@ class QLSTMGSCALE(object):
                 lstm_logger.dumpkvs()
             
         self.train_loss_history.clear()
-        self.train_val_loss_history.clear()
+        if(len(self.train_val_loss_history)>0):
+            self.train_val_loss_history.clear()
         self.train_val_rmse_history.clear()

@@ -150,11 +150,13 @@ def comput_loss_and_update2():
     transitions = transitions_batch[:,:-2]            
     #target_predicted = qt.predict(transitions)
     transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
-    update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
+    
 
     critic_value = critic_model.model([state_batch, action_batch], training=True).numpy()
     for i in range(len(st_1)):                 
         tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
+    
+    return state_batch, action_batch, reward_batch,next_state_batch,transitions
 
 
 def update_critic_target(state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
@@ -194,7 +196,7 @@ tm, rtm = config_memories()
 transitin_size = int((2*env.num_states + env.num_actions + 1))
 qt = QLSTMGSCALE(transitions_memory=tm,reduced_transitions_memory=rtm,
                               inputshapex=1,inputshapey=transitin_size,outputdim=env.num_actions,
-                              verbose=True,transition_batch_size=1000,netparamsdir='dev',
+                              verbose=False,transition_batch_size=1000,netparamsdir='dev',
                               target_optimizer="rmsprop",log_dir='dev')
 
 
@@ -249,13 +251,16 @@ for ep in range(total_episodes):
         tm.add_transition(prev_state,action,reward,state,q,done)
         episodic_reward += reward       
 
-        comput_loss_and_update2()
+        state_batch, action_batch, reward_batch,next_state_batch,transitions=comput_loss_and_update2()
         update_target(target_actor.model.variables, actor_model.model.variables, tau)
-        #update_target(target_critic.model.variables, critic_model.model.variables, tau)
+        update_target(target_critic.model.variables, critic_model.model.variables, tau)
         count+=1
         
         if ((count==6 or count % trainQTFreqquency == 0) and itr > learningStartIter):
-            qt.train_q_prediction(n_epochs=15)
+            #qt.train_q_prediction(n_epochs=15)
+            qt.train_q_prediction_withou_validation(n_epochs=150)
+            if(count>6):
+                update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
 
         # End this episode when `done` is True
         if done:            
