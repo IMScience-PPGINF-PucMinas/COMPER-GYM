@@ -9,14 +9,14 @@ class RNN(object):
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =tf.compat.v1.train.RMSPropOptimizer(learning_rate=0.00025) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =tf.compat.v1.train.RMSPropOptimizer(learning_rate=0.0003) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
         
         
         last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         self.lstm = tf.keras.Sequential()                                
         self.lstm.add(layers.LSTM(units=128,return_sequences=True,input_shape=(inputshapex,inputshapey),stateful=False,activation='tanh'))
-        self.lstm.add(layers.LSTM(units=64,return_sequences=True,activation='tanh'))
-        self.lstm.add(layers.LSTM(units=64,activation='tanh'))                                   
+        self.lstm.add(layers.LSTM(units=128,return_sequences=True,activation='tanh'))
+        self.lstm.add(layers.LSTM(units=128,activation='tanh'))                                   
         self.lstm.add(layers.Dense(units=1,kernel_initializer=last_init))         
 
     def compile(self,reload_weights_if_exists=True): #adam
