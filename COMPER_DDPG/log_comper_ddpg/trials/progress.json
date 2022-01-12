@@ -1,0 +1,4 @@
+{"Trial": 1, "Time": "11-01-2022 00:12:34", "TotalEp": 100, "Tqt": 10, "Lstmep": 15, "StartLearn": 1, "Upcritic": 5}
+{"Trial": 2, "Time": "11-01-2022 14:04:42", "TotalEp": 100, "Tqt": 10, "Lstmep": 15, "StartLearn": 1, "Upcritic": 10}
+{"Trial": 3, "Time": "12-01-2022 03:57:52", "TotalEp": 100, "Tqt": 10, "Lstmep": 15, "StartLearn": 1, "Upcritic": 50}
+{"Trial": 4, "Time": "12-01-2022 17:50:33", "TotalEp": 100, "Tqt": 10, "Lstmep": 15, "StartLearn": 1, "Upcritic": 100}
