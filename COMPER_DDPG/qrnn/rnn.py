@@ -1,23 +1,38 @@
-from tensorflow.keras import layers
+from statistics import mode
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.optimizers import RMSprop
 import tensorflow as tf
+from pathlib import Path
 import os
-
+import gc
 
 class RNN(object):
-    def __init__(self,inputshapex=1,inputshapey=35,output_dim=1,batch_size=128,verbose=True,netparamsdir='./',optimizer='rmsprop'):
+    def __init__(self,inputshapex=1,inputshapey=35,output_dim=1,batch_size=128,verbose=True,netparamsdir='./',optimizer='rmsprop',early_stopping=False):
         self.paramsidr = netparamsdir
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =tf.compat.v1.train.RMSPropOptimizer(learning_rate=0.0003) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =RMSprop(learning_rate=0.0003) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.early_stopping_callback=None
+        self.model_checkpoint_callback = None
+        self.checkoint_path = "./"
+        self.early_stopping =False
+        self.checking_point = False
         
-        
-        last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
-        self.lstm = tf.keras.Sequential()                                
-        self.lstm.add(layers.LSTM(units=128,return_sequences=True,input_shape=(inputshapex,inputshapey),stateful=False,activation='tanh'))
-        self.lstm.add(layers.LSTM(units=128,return_sequences=True,activation='tanh'))
-        self.lstm.add(layers.LSTM(units=128,activation='tanh'))                                   
-        self.lstm.add(layers.Dense(units=1,kernel_initializer=last_init))         
+        self.create_lstm()
+        if(early_stopping):
+            self.config_early_stopping()           
+             
+    
+    def create_lstm(self):
+        self.lstm = Sequential()                
+        self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(inputshapex,inputshapey),activation='tanh'))
+        self.lstm.add(LSTM(128,return_sequences=True,activation='tanh'))
+        self.lstm.add(LSTM(128,activation='tanh'))              
+        self.lstm.add(Dense(1))   
 
     def compile(self,reload_weights_if_exists=True): #adam
         loaded = self.load_weights() 
@@ -29,11 +44,15 @@ class RNN(object):
             self.lstm.compile(loss="mean_squared_error",optimizer='adam')
 
     def predict(self,x):
-        return self.lstm(x).numpy()
-        #return self.lstm.predict(x)
+        #return self.lstm(x).numpy()
+        return self.lstm.predict(x)
 
 
     def fit(self,x=None, y=None, batch_size=None, epochs=1, verbose=0, callbacks=None, validation_split=0., validation_data=None, shuffle=True, class_weight=None, sample_weight=None, initial_epoch=0, steps_per_epoch=None, validation_steps=None):
+        if(callbacks==None and self.early_stopping):
+            callbacks=[]
+            callbacks.append(self.early_stopping_callback)
+            
         return self.lstm.fit(x,y,batch_size,epochs,verbose,callbacks,validation_split,validation_data,shuffle,class_weight,sample_weight,initial_epoch,steps_per_epoch,validation_steps)
 
     def save_weights(self):
@@ -64,3 +83,23 @@ class RNN(object):
             loaded = True
         return loaded
     
+    def set_set_checkpoint_path(self,path):
+        self.checkoint_path = path
+
+    def config_early_stopping(self,monitor="val_loss",patience=10):
+        self.early_stopping_callback = keras.callbacks.EarlyStopping(monitor=monitor,mode='min',verbose=1,patience=patience)
+        self.early_stopping =True
+    
+    def config_checkpoint(self):
+        Path(self.checkpoint_path).mkdir(parents=True, exist_ok=True)
+        self.checkpoint_path=self.checkpoint_path+self.name+"_checkpoint.h5"
+        self.modelckpt_callback = keras.callbacks.ModelCheckpoint(
+            monitor="val_loss",
+            mode='min',
+            filepath=self.checkpoint_path,
+            verbose=1,
+            save_weights_only=True,
+            save_best_only=True,
+        )
+        self.checking_point = True
+

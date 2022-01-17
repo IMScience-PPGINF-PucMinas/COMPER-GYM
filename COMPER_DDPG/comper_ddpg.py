@@ -14,10 +14,6 @@ from data import logger
 from data import trial_logger as tl
 from datetime import datetime
 import os
-
-
-tf.enable_eager_execution()
-
 class COMPERDDPG(object):
     def __init__(self,task_name = "Pendulum-v1") -> None:
         super().__init__()
@@ -54,7 +50,7 @@ class COMPERDDPG(object):
     # Eager execution is turned on by default in TensorFlow 2. Decorating with tf.function allows
     # TensorFlow to build a static graph out of the logic and computations in our function.
     # This provides a large speed up for blocks of code that contain many small TensorFlow operations such as this one.
-    @tf.function
+    #@tf.function
     def update_actor_critic_nets(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
         # Training and updating Actor & Critic networks.
         # See Pseudo Code.    
@@ -79,7 +75,7 @@ class COMPERDDPG(object):
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
 
-    @tf.function
+    #@tf.function
     def update_actor_critic_nets2(self,state_batch, action_batch, reward_batch, next_state_batch):
         # Training and updating Actor & Critic networks.
         # See Pseudo Code.
@@ -160,7 +156,7 @@ class COMPERDDPG(object):
 
         transitions = transitions_batch[:,:-2]            
         #target_predicted = qt.predict(transitions)
-        transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
+        #transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
         
 
         critic_value = self.critic_model.model([state_batch, action_batch], training=True).numpy()
@@ -169,30 +165,29 @@ class COMPERDDPG(object):
         
         return state_batch, action_batch, reward_batch,next_state_batch,transitions
 
-
+    #@tf.function
     def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
         with tf.GradientTape() as tape:
             #target_actions = target_actor.model(next_state_batch, training=True)
             #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
-            y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
+            #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
             #y = reward_batch + gamma * target_predicted
+            y = self.qt.predict(target_predicted)
 
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_value = self.target_critic.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
+        critic_grad = tape.gradient(critic_loss, self.target_critic.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.target_critic.model.trainable_variables))
 
     # This update target parameters slowly
     # Based on rate `tau`, which is much less than one.
-    @tf.function
+    #@tf.function
     def update_target(self,target_weights, weights, tau):
         for (a, b) in zip(target_weights, weights):
             a.assign(b * tau + a * (1 - tau))
 
-
-
-    def train(self,total_episodes=100,lstm_epochs=150,start_update_critic=5,trainQTFreqquency=100,learningStartIter=1,trial=1):
+    def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,trial=1):
         logFrequency=100
         base_log_dir="./log/train/"
         rew_log_path = base_log_dir+"trial"+str(trial)+"/"
@@ -209,15 +204,17 @@ class COMPERDDPG(object):
         self.target_critic.model.set_weights(self.critic_model.model.get_weights())
 
         self.config_memories()
-        transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
+        #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
+        transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=False,transition_batch_size=1000,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path)
+                                    verbose=True,transition_batch_size=1000,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path)
         # To store reward history of each episode
         ep_reward_list = []
         # To store average reward history of last few episodes
         avg_reward_list = []
         log_itr=0
         count=0
+        first_qt_trained = False
         for ep in range(total_episodes):
 
             prev_state = self.env.reset()
@@ -244,13 +241,19 @@ class COMPERDDPG(object):
 
                 state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update2()
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
-                self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
-                count+=1
+                if(not first_qt_trained):
+                    self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
+                                
+                if (count % trainQTFreqquency == 0 and count > learningStartIter): 
+                    print("train qt---->",count)
+                    first_qt_trained=True                   
+                    self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs,b_size=32)
                 
-                if (count % trainQTFreqquency == 0 and itr > learningStartIter):                    
-                    self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
-                    if(count>(learningStartIter+start_update_critic)):
+                if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):
+                        print("update critic--->",count)
                         self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
+
+                count+=1
 
                 # End this episode when `done` is True
                 if done:            
@@ -283,7 +286,7 @@ class COMPERDDPG(object):
             avg_reward_list.append(avg_reward)
 
 
-def config_trial_logger(base_log_dir = "./log_comper_ddpg/trials/"):    
+def config_trial_logger(base_log_dir = "./log/trials/"):    
         tl.session(base_log_dir).__enter__()
 
 def trial_log(log_data_dict):
@@ -292,11 +295,11 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    total_episodes=[100,500,1000]
-    lstm_epochs=[15,50,100,150,200,250]    
-    trainQTFreqquency=[10,20,50,100]
-    learningStartIter=[1,10,50,100]
-    start_update_critic=[5,10,50,100]    
+    total_episodes=[100,100,100,100,100]
+    lstm_epochs=[300,200,150]
+    learningStartIter=[1,100,500,1000]    
+    trainQTFreqquency=[10,100,500]    
+    update_QTCritic_frequency=[5,10,50,100]    
     trial=0
     config_trial_logger()
 
@@ -304,7 +307,7 @@ def grid_search():
         for lstmep in lstm_epochs:
             for tqt in trainQTFreqquency:
                 for start in learningStartIter:
-                    for upcritic in start_update_critic:
+                    for upcritic in update_QTCritic_frequency:
                         trial+=1
                         now = datetime.now()
                         dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -316,9 +319,8 @@ def grid_search():
                             lstm_epochs=lstmep,
                             trainQTFreqquency=tqt,
                             learningStartIter= start,
-                            start_update_critic=upcritic,
-                            trial=trial)
-                        
+                            update_QTCritic_frequency=upcritic,
+                            trial=trial)                        
 
 def main():
     grid_search()

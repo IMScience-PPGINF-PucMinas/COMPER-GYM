@@ -14,7 +14,7 @@ from config.transitions import FrameTransition as ft
 
 
 class QLSTMGSCALE(object):
-    def __init__(self, transitions_memory, reduced_transitions_memory, inputshapex=1, inputshapey=35, outputdim=1, verbose=False, transition_batch_size=64, netparamsdir='./', target_optimizer='rmsprop', log_dir="",log_train=True):
+    def __init__(self, transitions_memory, reduced_transitions_memory, inputshapex=1, inputshapey=35, outputdim=1, verbose=False, transition_batch_size=64, netparamsdir='./', target_optimizer='rmsprop', log_dir="",log_train=True,target_early_stopping=False):
 
         self.train_loss_history = list()
         self.train_val_loss_history = list()
@@ -27,6 +27,7 @@ class QLSTMGSCALE(object):
         self.inputshapey = inputshapey
         self.verbose = verbose
         self.training = True
+        self.target_early_stopping = target_early_stopping
         self.transitions_memory = transitions_memory
         self.transitions_memory_l = reduced_transitions_memory
         self.netparamsdir = netparamsdir
@@ -61,7 +62,7 @@ class QLSTMGSCALE(object):
     def __initialize_ltsm_q_prediction(self):
         self.lstm = RNN(inputshapex=self.inputshapex, inputshapey=self.inputshapey,
                         output_dim=self.outputdim, batch_size=self.lstm_bacth_size, 
-                        netparamsdir=self.netparamsdir)
+                        netparamsdir=self.netparamsdir,early_stopping=self.target_early_stopping)
         self.lstm.compile()
 
     def save_weights(self):
