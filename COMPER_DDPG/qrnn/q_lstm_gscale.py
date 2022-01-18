@@ -1,7 +1,7 @@
 
 import numpy as np
 #from matplotlib import pyplot
-import pandas as pand
+import pandas as pd
 from pandas import DataFrame
 from pandas import concat
 import math
@@ -19,7 +19,7 @@ class QLSTMGSCALE(object):
         self.train_loss_history = list()
         self.train_val_loss_history = list()
         self.train_val_rmse_history = list()
-        self.scaler = MinMaxScaler(feature_range=(-1, 1))        
+        self.scaler = MinMaxScaler(feature_range=(0, 1))        
         self.lstm_bacth_size = 32
         self.transitions_default_batch_size = transition_batch_size
         self.transitions_real_batch_size = 0
@@ -64,6 +64,8 @@ class QLSTMGSCALE(object):
                         output_dim=self.outputdim, batch_size=self.lstm_bacth_size, 
                         netparamsdir=self.netparamsdir,early_stopping=self.target_early_stopping)
         self.lstm.compile()
+    
+    
 
     def save_weights(self):
         self.lstm.save_weights()
@@ -75,22 +77,26 @@ class QLSTMGSCALE(object):
 
         try:
             transition_features = self.transitions_memory.load_transitions_batch_as_features_array(bsize=self.transitions_default_batch_size,normalizeFromMean=True)
-            
-            values = np.array(transition_features[:,-1])
-            
-            values = values[:,np.newaxis]
-            
-            transition_features = transition_features[:,:-1]
-            transition_features = self.scaler.fit_transform(transition_features)
-            transition_features = np.concatenate((transition_features,values),axis=1)
-            
-            
+            self.transitions_real_batch_size = len(transition_features)
             transformed = self.transform_transitions(transition_features, 1, 1)           
             if(self.verbose):                
                 print("\n transformed", transformed.shape)
                 print(transformed.head(5))
                 
             transformed.drop(transformed.columns[self.features_to_drop], axis=1, inplace=True)
+
+            if(self.verbose):                
+                print("\n droped columns", transformed.shape)
+                print(transformed.head(5))
+            values_col=transformed.columns.values[-1]
+            values = transformed[values_col].to_numpy()
+            values = values.reshape(values.shape[0],1)
+            transformed.drop([values_col], axis=1,inplace=True)
+            transformed = transformed.to_numpy()
+            
+            transformed = self.scaler.fit_transform(transformed)
+            transformed = np.concatenate((transformed,values),axis=1)
+            transformed = pd.DataFrame(transformed)
             
 
             if(self.verbose):
@@ -255,7 +261,7 @@ class QLSTMGSCALE(object):
     def predict(self, input_transitions):
         self.training = False
         try:
-            transition_features = self.scaler.fit_transform(input_transitions)            
+            transition_features = self.scaler.transform(input_transitions)            
             transition_features = transition_features.reshape((transition_features.shape[0], 1, transition_features.shape[1]))
             predict_result = self.lstm.predict(transition_features)
             return predict_result

@@ -172,7 +172,7 @@ class COMPERDDPG(object):
             #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
             #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
             #y = reward_batch + gamma * target_predicted
-            y = self.qt.predict(target_predicted)
+            y =self.qt.predict(target_predicted)
 
             critic_value = self.target_critic.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
@@ -207,7 +207,7 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=True,transition_batch_size=1000,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path)
+                                    verbose=True,transition_batch_size=10,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
         # To store reward history of each episode
         ep_reward_list = []
         # To store average reward history of last few episodes
@@ -246,8 +246,8 @@ class COMPERDDPG(object):
                                 
                 if (count % trainQTFreqquency == 0 and count > learningStartIter): 
                     print("train qt---->",count)
-                    first_qt_trained=True                   
-                    self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs,b_size=32)
+                    first_qt_trained=True                                     
+                    self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
                 
                 if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):
                         print("update critic--->",count)
@@ -296,10 +296,10 @@ def trial_log(log_data_dict):
 
 def grid_search():
     total_episodes=[100,100,100,100,100]
-    lstm_epochs=[300,200,150]
-    learningStartIter=[1,100,500,1000]    
-    trainQTFreqquency=[10,100,500]    
-    update_QTCritic_frequency=[5,10,50,100]    
+    lstm_epochs=[500,300,200,150]
+    learningStartIter=[1,5,100,500,1000]    
+    trainQTFreqquency=[2,100,500]    
+    update_QTCritic_frequency=[2,10,50,100]    
     trial=0
     config_trial_logger()
 

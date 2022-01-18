@@ -15,12 +15,16 @@ class RNN(object):
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =RMSprop(learning_rate=0.0003) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =RMSprop(learning_rate=0.001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
         self.early_stopping_callback=None
         self.model_checkpoint_callback = None
         self.checkoint_path = "./"
         self.early_stopping =False
         self.checking_point = False
+        self.inputshapex = inputshapex
+        self.inputshapey = inputshapey
+
+
         
         self.create_lstm()
         if(early_stopping):
@@ -29,10 +33,12 @@ class RNN(object):
     
     def create_lstm(self):
         self.lstm = Sequential()                
-        self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(inputshapex,inputshapey),activation='tanh'))
+        self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(self.inputshapex,self.inputshapey),activation='tanh'))
         self.lstm.add(LSTM(128,return_sequences=True,activation='tanh'))
         self.lstm.add(LSTM(128,activation='tanh'))              
-        self.lstm.add(Dense(1))   
+        self.lstm.add(Dense(1))
+
+         
 
     def compile(self,reload_weights_if_exists=True): #adam
         loaded = self.load_weights() 
@@ -86,7 +92,7 @@ class RNN(object):
     def set_set_checkpoint_path(self,path):
         self.checkoint_path = path
 
-    def config_early_stopping(self,monitor="val_loss",patience=10):
+    def config_early_stopping(self,monitor="loss",patience=50):
         self.early_stopping_callback = keras.callbacks.EarlyStopping(monitor=monitor,mode='min',verbose=1,patience=patience)
         self.early_stopping =True
     
