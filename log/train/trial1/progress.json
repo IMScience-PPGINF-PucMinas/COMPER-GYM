@@ -1,7 +1,3 @@
-{"Count": 1, "Task": "Pendulum-v1", "Time": "18-01-2022 00:46:04", "TMCount": 87, "RTMCount": 84, "Ep": 0, "Itr": 100, "Rew": -689.7822553475074, "AvgEpRew": -6.897822553475074, "AvgTrialRew": 0.0}
-{"Count": 2, "Task": "Pendulum-v1", "Time": "18-01-2022 00:49:53", "TMCount": 184, "RTMCount": 169, "Ep": 0, "Itr": 200, "Rew": -1377.848279048982, "AvgEpRew": -6.88924139524491, "AvgTrialRew": 0.0}
-{"Count": 3, "Task": "Pendulum-v1", "Time": "18-01-2022 00:49:53", "TMCount": 193, "RTMCount": 169, "Ep": 0, "Itr": 201, "Rew": -1388.0007219974775, "AvgEpRew": -6.905476228843172, "AvgTrialRew": 0.0}
-{"Count": 4, "Task": "Pendulum-v1", "Time": "18-01-2022 00:54:29", "TMCount": 274, "RTMCount": 253, "Ep": 1, "Itr": 100, "Rew": -482.9628749461591, "AvgEpRew": -4.829628749461591, "AvgTrialRew": -1388.0007219974775}
-{"Count": 5, "Task": "Pendulum-v1", "Time": "18-01-2022 00:58:46", "TMCount": 360, "RTMCount": 337, "Ep": 1, "Itr": 200, "Rew": -1127.4414109615013, "AvgEpRew": -5.637207054807507, "AvgTrialRew": -1388.0007219974775}
-{"Count": 6, "Task": "Pendulum-v1", "Time": "18-01-2022 00:58:47", "TMCount": 371, "RTMCount": 337, "Ep": 1, "Itr": 201, "Rew": -1132.835844020056, "AvgEpRew": -5.635999223980377, "AvgTrialRew": -1388.0007219974775}
-{"Count": 7, "Task": "Pendulum-v1", "Time": "18-01-2022 01:02:33", "TMCount": 466, "RTMCount": 422, "Ep": 2, "Itr": 100, "Rew": -445.6314483157642, "AvgEpRew": -4.456314483157642, "AvgTrialRew": -1260.4182830087666}
+{"Count": 1, "Task": "Pendulum-v1", "Time": "19-01-2022 01:36:25", "TMCount": 100, "RTMCount": 0, "Ep": 0, "Itr": 100, "Rew": -472.09742124982324, "AvgEpRew": -4.720974212498232, "AvgTrialRew": 0}
+{"Count": 2, "Task": "Pendulum-v1", "Time": "19-01-2022 01:37:52", "TMCount": 195, "RTMCount": 99, "Ep": 0, "Itr": 200, "Rew": -1270.6149465485785, "AvgEpRew": -6.3530747327428925, "AvgTrialRew": 0}
+{"Count": 3, "Task": "Pendulum-v1", "Time": "19-01-2022 01:37:53", "TMCount": 196, "RTMCount": 99, "Ep": 0, "Itr": 201, "Rew": -1276.8560907341707, "AvgEpRew": -6.3525178643491085, "AvgTrialRew": 0}

@@ -174,11 +174,11 @@ class COMPERDDPG(object):
             #y = reward_batch + gamma * target_predicted
             y =self.qt.predict(target_predicted)
 
-            critic_value = self.target_critic.model([state_batch, action_batch], training=True)
+            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
-        critic_grad = tape.gradient(critic_loss, self.target_critic.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.target_critic.model.trainable_variables))
+        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
 
     # This update target parameters slowly
     # Based on rate `tau`, which is much less than one.
@@ -187,7 +187,7 @@ class COMPERDDPG(object):
         for (a, b) in zip(target_weights, weights):
             a.assign(b * tau + a * (1 - tau))
 
-    def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,trial=1):
+    def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
         logFrequency=100
         base_log_dir="./log/train/"
         rew_log_path = base_log_dir+"trial"+str(trial)+"/"
@@ -207,7 +207,7 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=True,transition_batch_size=10,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
+                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
         # To store reward history of each episode
         ep_reward_list = []
         # To store average reward history of last few episodes
@@ -241,8 +241,9 @@ class COMPERDDPG(object):
 
                 state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update2()
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
-                if(not first_qt_trained):
-                    self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
+                self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)                
+                #if(not first_qt_trained):
+                                       
                                 
                 if (count % trainQTFreqquency == 0 and count > learningStartIter): 
                     print("train qt---->",count)
@@ -275,7 +276,7 @@ class COMPERDDPG(object):
                     ('Itr', itr),
                     ('Rew', episodic_reward),
                     ('AvgEpRew', (episodic_reward/itr)),
-                    ('AvgTrialRew', np.mean(avg_trial_rew))]
+                    ('AvgTrialRew', avg_trial_rew)]
                     self.log(log_data_dict) 
 
             ep_reward_list.append(episodic_reward)
@@ -295,11 +296,12 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    total_episodes=[100,100,100,100,100]
-    lstm_epochs=[500,300,200,150]
-    learningStartIter=[1,5,100,500,1000]    
-    trainQTFreqquency=[2,100,500]    
-    update_QTCritic_frequency=[2,10,50,100]    
+    total_episodes=[100]
+    lstm_epochs=[500]
+    learningStartIter=[1]    
+    trainQTFreqquency=[100]    
+    update_QTCritic_frequency=[100]
+    q_lstm_bsize=[1000]    
     trial=0
     config_trial_logger()
 
@@ -308,19 +310,21 @@ def grid_search():
             for tqt in trainQTFreqquency:
                 for start in learningStartIter:
                     for upcritic in update_QTCritic_frequency:
-                        trial+=1
-                        now = datetime.now()
-                        dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-                        log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic)]
-                        trial_log(log_data_dict)
-                        agent = COMPERDDPG()
-                        agent.train(
-                            total_episodes=tep,
-                            lstm_epochs=lstmep,
-                            trainQTFreqquency=tqt,
-                            learningStartIter= start,
-                            update_QTCritic_frequency=upcritic,
-                            trial=trial)                        
+                        for bs in q_lstm_bsize:
+                            trial+=1
+                            now = datetime.now()
+                            dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+                            log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic)]
+                            trial_log(log_data_dict)
+                            agent = COMPERDDPG()
+                            agent.train(
+                                total_episodes=tep,
+                                lstm_epochs=lstmep,
+                                trainQTFreqquency=tqt,
+                                learningStartIter= start,
+                                update_QTCritic_frequency=upcritic,
+                                q_lstm_bsize=bs,
+                                trial=trial)                        
 
 def main():
     grid_search()
