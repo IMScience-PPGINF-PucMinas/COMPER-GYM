@@ -274,6 +274,7 @@ class COMPERDDPG(object):
                     ('RTMCount',self.rtm.__len__()),
                     ('Ep', ep),
                     ('Itr', itr),
+                    ("Done",done),
                     ('Rew', episodic_reward),
                     ('AvgEpRew', (episodic_reward/itr)),
                     ('AvgTrialRew', avg_trial_rew)]
@@ -301,7 +302,7 @@ def grid_search():
     learningStartIter=[1]    
     trainQTFreqquency=[100]    
     update_QTCritic_frequency=[100]
-    q_lstm_bsize=[1000]    
+    q_lstm_bsize=[10000]    
     trial=0
     config_trial_logger()
 
@@ -314,7 +315,9 @@ def grid_search():
                             trial+=1
                             now = datetime.now()
                             dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-                            log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic)]
+                            log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),
+                            ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
+                            ('Qlstm_bs',bs)]
                             trial_log(log_data_dict)
                             agent = COMPERDDPG()
                             agent.train(

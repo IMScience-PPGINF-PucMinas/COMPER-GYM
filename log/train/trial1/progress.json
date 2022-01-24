@@ -1,3 +1,0 @@
-{"Count": 1, "Task": "Pendulum-v1", "Time": "19-01-2022 01:36:25", "TMCount": 100, "RTMCount": 0, "Ep": 0, "Itr": 100, "Rew": -472.09742124982324, "AvgEpRew": -4.720974212498232, "AvgTrialRew": 0}
-{"Count": 2, "Task": "Pendulum-v1", "Time": "19-01-2022 01:37:52", "TMCount": 195, "RTMCount": 99, "Ep": 0, "Itr": 200, "Rew": -1270.6149465485785, "AvgEpRew": -6.3530747327428925, "AvgTrialRew": 0}
-{"Count": 3, "Task": "Pendulum-v1", "Time": "19-01-2022 01:37:53", "TMCount": 196, "RTMCount": 99, "Ep": 0, "Itr": 201, "Rew": -1276.8560907341707, "AvgEpRew": -6.3525178643491085, "AvgTrialRew": 0}

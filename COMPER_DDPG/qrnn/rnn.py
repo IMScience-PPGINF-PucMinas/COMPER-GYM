@@ -1,13 +1,14 @@
 from statistics import mode
-import keras
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.optimizers import RMSprop
+import tensorflow.keras as keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.optimizers import RMSprop
 import tensorflow as tf
 from pathlib import Path
 import os
 import gc
+
 
 class RNN(object):
     def __init__(self,inputshapex=1,inputshapey=35,output_dim=1,batch_size=128,verbose=True,netparamsdir='./',optimizer='rmsprop',early_stopping=False):
@@ -51,7 +52,7 @@ class RNN(object):
 
     def predict(self,x):
         #return self.lstm(x).numpy()
-        return self.lstm.predict(x)
+        return self.lstm(x).numpy()
 
 
     def fit(self,x=None, y=None, batch_size=None, epochs=1, verbose=0, callbacks=None, validation_split=0., validation_data=None, shuffle=True, class_weight=None, sample_weight=None, initial_epoch=0, steps_per_epoch=None, validation_steps=None):
