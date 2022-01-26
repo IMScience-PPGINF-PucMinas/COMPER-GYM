@@ -1,9 +1,8 @@
 from statistics import mode
-import tensorflow.keras as keras
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import LSTM
-from tensorflow.keras.optimizers import RMSprop
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
 import tensorflow as tf
 from pathlib import Path
 import os
@@ -16,7 +15,7 @@ class RNN(object):
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =RMSprop(learning_rate=0.001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =tf.train.RMSPropOptimizer(learning_rate=0.001)
         self.early_stopping_callback=None
         self.model_checkpoint_callback = None
         self.checkoint_path = "./"
@@ -52,7 +51,7 @@ class RNN(object):
 
     def predict(self,x):
         #return self.lstm(x).numpy()
-        return self.lstm(x).numpy()
+        return self.lstm.predict(x)
 
 
     def fit(self,x=None, y=None, batch_size=None, epochs=1, verbose=0, callbacks=None, validation_split=0., validation_data=None, shuffle=True, class_weight=None, sample_weight=None, initial_epoch=0, steps_per_epoch=None, validation_steps=None):
