@@ -37,9 +37,14 @@ class COMPERDDPG(object):
         self.tm = TM(max_size=100000,name="tm", memory_dir="./")
         self.rtm  = RTM(max_size=100000,name="rtm",memory_dir="/.")
     
-    def update_actor_critic_nets(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):        
+    def update_actor_critic_nets(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
+        # Training and updating Actor & Critic networks.
+        # See Pseudo Code.    
         with tf.GradientTape() as tape:
-            y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)           
+            #target_actions = target_actor.model(next_state_batch, training=True)
+            #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
+            y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
+            #y = reward_batch + gamma * target_predicted
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
@@ -49,13 +54,17 @@ class COMPERDDPG(object):
         with tf.GradientTape() as tape:
             actions = self.actor_model.model(state_batch, training=True)
             critic_value = self.critic_model.model([state_batch, actions], training=True)
+            # Used `-value` as we want to maximize the value given
+            # by the critic for our actions
             actor_loss = -tf.math.reduce_mean(critic_value)
 
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
 
     
-    def update_actor_critic_nets2(self,state_batch, action_batch, reward_batch, next_state_batch):        
+    def update_actor_critic_nets2(self,state_batch, action_batch, reward_batch, next_state_batch):
+        # Training and updating Actor & Critic networks.
+        # See Pseudo Code.
         with tf.GradientTape() as tape:
             target_actions = self.target_actor.model(next_state_batch, training=True)
             y = reward_batch + self.gamma * self.target_critic.model([next_state_batch, target_actions], training=True)
@@ -67,7 +76,9 @@ class COMPERDDPG(object):
 
         with tf.GradientTape() as tape:
             actions = self.actor_model.model(state_batch, training=True)
-            critic_value = self.critic_model.model([state_batch, actions], training=True)            
+            critic_value = self.critic_model.model([state_batch, actions], training=True)
+            # Used `-value` as we want to maximize the value given
+            # by the critic for our actions
             actor_loss = -tf.math.reduce_mean(critic_value)
 
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
@@ -100,7 +111,7 @@ class COMPERDDPG(object):
         reward_batch = tf.cast(reward_batch, dtype=tf.float32)
         next_state_batch = tf.convert_to_tensor(st)
         transitions = transitions_batch[:,:-2]            
-        
+        #target_predicted = qt.predict(transitions)
         transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
         self.update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch,transitions)
 
@@ -111,9 +122,9 @@ class COMPERDDPG(object):
     def comput_loss_and_update2(self):
         transitions_batch=[]   
         if(self.rtm. __len__()>0):
-            transitions_batch = self.rtm.sample_transitions_batch(100)
+            transitions_batch = self.rtm.sample_transitions_batch(64)
         else:
-            transitions_batch = self.tm.sample_transitions_batch(100)
+            transitions_batch = self.tm.sample_transitions_batch(64)
         
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
         a = np.array(a)
@@ -128,9 +139,12 @@ class COMPERDDPG(object):
 
         self.update_actor_critic_nets2(state_batch, action_batch, reward_batch,next_state_batch)
 
-        transitions = transitions_batch[:,:-2]
+        transitions = transitions_batch[:,:-2]            
+        #target_predicted = qt.predict(transitions)
+        #transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
+        
 
-        critic_value = self.critic_model.forward([state_batch, action_batch])
+        critic_value = self.critic_model.model([state_batch, action_batch], training=True).numpy()
         for i in range(len(st_1)):                 
             self.tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
         
@@ -138,14 +152,19 @@ class COMPERDDPG(object):
 
     
     def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
-        with tf.GradientTape() as tape:            
+        with tf.GradientTape() as tape:
+            #target_actions = target_actor.model(next_state_batch, training=True)
+            #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
+            #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
+            #y = reward_batch + gamma * target_predicted
             y =self.qt.predict(target_predicted)
+
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
         critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
         self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
-   
+
     def update_target(self,target_weights, weights, tau):
         for (a, b) in zip(target_weights, weights):
             a.assign(b * tau + a * (1 - tau))
@@ -231,7 +250,7 @@ class COMPERDDPG(object):
         for step in range(total_steps):
             itr+=1
             tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)                
-            action = policy.get_action(tf_prev_state,self.actor_model,self.env.lower_bound,self.env.upper_bound)
+            action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound)
             state, reward, done, info = self.env.step(action)      
             a = np.array(action)
             a = a.reshape(a.shape[0],1)
