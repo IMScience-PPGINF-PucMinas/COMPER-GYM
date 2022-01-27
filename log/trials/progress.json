@@ -9,3 +9,27 @@
 {"Trial": 1, "Time": "26-01-2022 14:29:23", "TotalEp": 100, "Tqt": 100, "Lstmep": 500, "StartLearn": 1, "Upcritic": 100, "Qlstm_bs": 10000}
 {"Trial": 1, "Time": "26-01-2022 14:29:45", "TotalEp": 100, "Tqt": 100, "Lstmep": 500, "StartLearn": 1, "Upcritic": 100, "Qlstm_bs": 10000}
 {"Trial": 1, "Time": "26-01-2022 14:38:49", "TotalEp": 100, "Tqt": 10, "Lstmep": 500, "StartLearn": 1, "Upcritic": 10, "Qlstm_bs": 10000}
+{"Trial": 1}
+{"Time": "27-01-2022 20:34:36"}
+{"TotalEp": 100}
+{"Tqt": 100}
+{"Lstmep": 500}
+{"StartLearn": 1}
+{"Upcritic": 100}
+{"Qlstm_bs": 10000}
+{"Trial": 1}
+{"Time": "27-01-2022 20:35:13"}
+{"TotalEp": 100}
+{"Tqt": 100}
+{"Lstmep": 500}
+{"StartLearn": 1}
+{"Upcritic": 100}
+{"Qlstm_bs": 10000}
+{"Trial": 1}
+{"Time": "27-01-2022 20:36:30"}
+{"TotalEp": 100}
+{"Tqt": 100}
+{"Lstmep": 500}
+{"StartLearn": 1}
+{"Upcritic": 100}
+{"Qlstm_bs": 10000}
