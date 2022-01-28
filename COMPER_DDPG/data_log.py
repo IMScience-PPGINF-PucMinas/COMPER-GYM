@@ -6,15 +6,15 @@ import os
 
 
 
-train_logger.session("./log_comper_ddpg/train/").__enter__()
-eval_logger.session("./log_comper_ddpg/eval/").__enter__()
+train_logger.session("./log/train/").__enter__()
+eval_logger.session("./log/eval/").__enter__()
 trial_logger.session("./log/trials/").__enter__()
 
 
 def log(logger_obj,log_data_dict):
     for k, v in log_data_dict:
         logger_obj.logkv(k, v)
-        logger_obj.dumpkvs()
+    logger_obj.dumpkvs()
 
 def log_train_data(trial,log_itr,task_name,dt_string,tm_len,rtm_len,ep,itr,done,episodic_reward,episodic_reward_itr,
                 last_ep_avg_reward, avg_trial_rew):

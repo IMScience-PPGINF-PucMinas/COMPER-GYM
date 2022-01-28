@@ -37,34 +37,8 @@ class COMPERDDPG(object):
         self.tm = TM(max_size=100000,name="tm", memory_dir="./")
         self.rtm  = RTM(max_size=100000,name="rtm",memory_dir="/.")
     
-    def update_actor_critic_nets(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
-        # Training and updating Actor & Critic networks.
-        # See Pseudo Code.    
-        with tf.GradientTape() as tape:
-            #target_actions = target_actor.model(next_state_batch, training=True)
-            #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
-            y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
-            #y = reward_batch + gamma * target_predicted
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
-
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
-
-        with tf.GradientTape() as tape:
-            actions = self.actor_model.model(state_batch, training=True)
-            critic_value = self.critic_model.model([state_batch, actions], training=True)
-            # Used `-value` as we want to maximize the value given
-            # by the critic for our actions
-            actor_loss = -tf.math.reduce_mean(critic_value)
-
-        actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
-        self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
-
     
-    def update_actor_critic_nets2(self,state_batch, action_batch, reward_batch, next_state_batch):
-        # Training and updating Actor & Critic networks.
-        # See Pseudo Code.
+    def update_actor_critic_nets(self,state_batch, action_batch, reward_batch, next_state_batch):
         with tf.GradientTape() as tape:
             target_actions = self.target_actor.model(next_state_batch, training=True)
             y = reward_batch + self.gamma * self.target_critic.model([next_state_batch, target_actions], training=True)
@@ -77,8 +51,6 @@ class COMPERDDPG(object):
         with tf.GradientTape() as tape:
             actions = self.actor_model.model(state_batch, training=True)
             critic_value = self.critic_model.model([state_batch, actions], training=True)
-            # Used `-value` as we want to maximize the value given
-            # by the critic for our actions
             actor_loss = -tf.math.reduce_mean(critic_value)
 
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
@@ -93,39 +65,16 @@ class COMPERDDPG(object):
             done = transitions[:,ft.T_IDX_DONE] # get done signals
             return st_1,a,r,st,q,done
     
+    def get_transitions_batch(self):
+        transitions_batch=[]   
+        if(self.rtm. __len__()>0):
+            transitions_batch = self.rtm.sample_transitions_batch(100)
+        else:
+            transitions_batch = self.tm.sample_transitions_batch(100)        
+        return transitions_batch
+
     def comput_loss_and_update(self):
-        transitions_batch=[]   
-        if(self.rtm. __len__()>0):
-            transitions_batch = self.rtm.sample_transitions_batch(64)
-        else:
-            transitions_batch = self.tm.sample_transitions_batch(64)
-        
-        st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
-        a = np.array(a)
-        a = a.reshape(a.shape[0],1)
-        r = np.array(r)
-        r = r.reshape(r.shape[0],1)
-        state_batch = tf.convert_to_tensor(st_1)
-        action_batch = tf.convert_to_tensor(a)
-        reward_batch = tf.convert_to_tensor(r)
-        reward_batch = tf.cast(reward_batch, dtype=tf.float32)
-        next_state_batch = tf.convert_to_tensor(st)
-        transitions = transitions_batch[:,:-2]            
-        #target_predicted = qt.predict(transitions)
-        transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
-        self.update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch,transitions)
-
-        critic_value = self.critic_model.model([state_batch, action_batch], training=True).numpy()
-        for i in range(len(st_1)):                 
-            self.tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
-
-    def comput_loss_and_update2(self):
-        transitions_batch=[]   
-        if(self.rtm. __len__()>0):
-            transitions_batch = self.rtm.sample_transitions_batch(64)
-        else:
-            transitions_batch = self.tm.sample_transitions_batch(64)
-        
+        transitions_batch=self.get_transitions_batch()        
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
         a = np.array(a)
         a = a.reshape(a.shape[0],1)
@@ -137,28 +86,19 @@ class COMPERDDPG(object):
         reward_batch = tf.cast(reward_batch, dtype=tf.float32)
         next_state_batch = tf.convert_to_tensor(st)
 
-        self.update_actor_critic_nets2(state_batch, action_batch, reward_batch,next_state_batch)
+        self.update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch)
 
-        transitions = transitions_batch[:,:-2]            
-        #target_predicted = qt.predict(transitions)
-        #transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
-        
-
+        transitions = transitions_batch[:,:-2]
         critic_value = self.critic_model.model([state_batch, action_batch], training=True).numpy()
+
         for i in range(len(st_1)):                 
             self.tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
         
         return state_batch, action_batch, reward_batch,next_state_batch,transitions
-
     
     def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
         with tf.GradientTape() as tape:
-            #target_actions = target_actor.model(next_state_batch, training=True)
-            #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
-            #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
-            #y = reward_batch + gamma * target_predicted
             y =self.qt.predict(target_predicted)
-
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
@@ -172,16 +112,16 @@ class COMPERDDPG(object):
     def log_evaluation(self,trial,dt_string,task_name,iterations,avg_trial_rew):
         now = datetime.now()        
         dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-        dlog.eval_logger(trial,dt_string,task_name,iterations,avg_trial_rew)
+        dlog.log_eval_data(trial,dt_string,task_name,iterations,avg_trial_rew)
 
     def evaluate(self,trial,iterations,n_episodes=50):
-        env = GymEnv(task_name)
+        env = GymEnv(self.task_name)
         ep_reward_list = []
-
         for ep in range(n_episodes):
             ep_reward_list = []
             prev_state = env.reset()
-            episodic_reward = 0        
+            episodic_reward = 0
+            done=False        
             while not done:
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action_no_noise(tf_prev_state,self.actor_model.model,env.lower_bound,env.upper_bound)
@@ -191,7 +131,9 @@ class COMPERDDPG(object):
                 ep_reward_list.append(episodic_reward)
         
         avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
-        print("Evaluate * {} * Eval Avg Reward is ==> {}".format(trial, avg_reward))
+        now = datetime.now()        
+        dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+        print("Evaluate * {} * Eval Avg Reward is ==> {}".format(trial,avg_trial_rew))
         self.log_evaluation(trial,dt_string,self.task_name,iterations,avg_trial_rew)
 
     def log_train(self,trial,ep,log_itr,itr,done,episodic_reward,ep_reward_list):
@@ -201,8 +143,7 @@ class COMPERDDPG(object):
         dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
         dlog.log_train_data(trial,log_itr,self.task_name,dt_string,self.tm.__len__(),self.rtm.__len__(),
                             ep,itr,done,episodic_reward,(episodic_reward/itr),last_ep_avg_reward, avg_trial_rew)
-
-
+                            
     def create_actor_critic(self):
         self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
         self.critic_model = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
@@ -230,7 +171,6 @@ class COMPERDDPG(object):
 
     def train(self,total_steps=100000,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1,
                 evaluate_frequency = 5000,evaluate_epsodes = 50):
-
         logFrequency=100
         base_log_dir="./log/train/"
         rew_log_path = base_log_dir+"trial"+str(trial)+"/"
@@ -241,11 +181,13 @@ class COMPERDDPG(object):
         self.create_q_target(q_lstm_bsize,qlstm_log_path)
         
         ep_reward_list = []      
-        log_itr=1
+        log_itr=0
         first_qt_trained = False
         ep=1
         done=False
         prev_state = self.env.reset()
+        itr=0
+        episodic_reward = 0
 
         for step in range(total_steps):
             itr+=1
@@ -259,7 +201,7 @@ class COMPERDDPG(object):
             self.tm.add_transition(prev_state,action,reward,state,q,done)
             episodic_reward += reward       
 
-            state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update2()
+            state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update()
             self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
             self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                                 
@@ -272,28 +214,33 @@ class COMPERDDPG(object):
                 print("update critic--->",step)
                 self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
                 
-            if(step % evaluate_frequency==0):
-                self.evaluate(self.actor_model,trial,step,evaluate_epsodes)
+            if(step % evaluate_frequency==0 and step > learningStartIter):
+                print("evaluate agent--->",step)
+                self.evaluate(trial,step,evaluate_epsodes)
             
             prev_state = state
+            
+
+            #if((step % logFrequency == 0) or done):
+             #  log_itr+=1
+              # self.log_train(trial,ep,log_itr,itr,done,episodic_reward,ep_reward_list)
 
             if(done):
-                ep+=1
-                prev_state = self.env.reset()
-                itr = 1
                 ep_reward_list.append(episodic_reward)
+                log_itr+=1
+                self.log_train(trial,ep,log_itr,itr,done,episodic_reward,ep_reward_list)
+                prev_state = self.env.reset()                                
                 episodic_reward = 0
                 avg_reward = np.mean(ep_reward_list[-40:])
                 print("Episode * {} * Avg Reward is ==> {}".format(ep, avg_reward))
+                itr = 0
+                ep+=1
 
-            if((itr % logFrequency == 0) or done):
-                log_itr+=1
-                self.log_train(trial,ep,log_itr,itr,done,episodic_reward,ep_reward_list)
-            
+           
             
             
 def grid_search():
-    total_steps=[100]
+    total_steps=[100000]
     lstm_epochs=[500]
     learningStartIter=[1]    
     trainQTFreqquency=[100]    
@@ -301,7 +248,7 @@ def grid_search():
     q_lstm_bsize=[10000]    
     trial=0
     evaluate_frequency = 5000
-    evaluate_epsodes = 50    
+    evaluate_epsodes = 10    
 
     for tep in total_steps:
         for lstmep in lstm_epochs:
