@@ -98,13 +98,19 @@ class COMPERDDPG(object):
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
 
-    def _get_transition_components(self,transitions):
+    def _get_transition_components(self,transitions):            
             st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
-            a = transitions[:,ft.T_IDX_A]
+            a = transitions[:,ft.T_IDX_A[0]:ft.T_IDX_A[1]]
             r = transitions[:,ft.T_IDX_R] # get rewards
             st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
             q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
             done = transitions[:,ft.T_IDX_DONE] # get done signals
+            #st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
+            #a = transitions[:,ft.T_IDX_A]
+            #r = transitions[:,ft.T_IDX_R] # get rewards
+            #st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
+            #q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
+            #done = transitions[:,ft.T_IDX_DONE] # get done signals
             return st_1,a,r,st,q,done
 
     # We compute the loss and update parameters
@@ -143,9 +149,9 @@ class COMPERDDPG(object):
         
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
         a = np.array(a)
-        a = a.reshape(a.shape[0],1)
+        #a = a.reshape(a.shape[0],1)
         r = np.array(r)
-        r = r.reshape(r.shape[0],1)
+        #r = r.reshape(r.shape[0],1)
         state_batch = tf.convert_to_tensor(st_1)
         action_batch = tf.convert_to_tensor(a)
         reward_batch = tf.convert_to_tensor(r)
@@ -193,10 +199,10 @@ class COMPERDDPG(object):
         rew_log_path = base_log_dir+"trial"+str(trial)+"/"
         qlstm_log_path = rew_log_path+"lstm/"    
         self.config_logger(rew_log_path)
-        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
 
-        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.target_critic = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
 
         # Making the weights equal initially
@@ -232,10 +238,12 @@ class COMPERDDPG(object):
                 action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound)
                 # Recieve state and reward from environment.
                 state, reward, done, info = self.env.step(action)      
-                a = np.array(action)
-                a = a.reshape(a.shape[0],1)
-                q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(a)]).numpy()
-
+                #a = np.array(action)
+                #a = a.reshape(a.shape[0],1)
+                
+                q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)]).numpy()
+                action = np.array(action)
+                action = action.reshape(action.shape[1])
                 self.tm.add_transition(prev_state,action,reward,state,q,done)
                 episodic_reward += reward       
 
@@ -297,7 +305,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    total_episodes=[100]
+    total_episodes=[100000]
     lstm_epochs=[500]
     learningStartIter=[1]    
     trainQTFreqquency=[100]    
@@ -319,7 +327,7 @@ def grid_search():
                             ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
                             ('Qlstm_bs',bs)]
                             trial_log(log_data_dict)
-                            agent = COMPERDDPG()
+                            agent = COMPERDDPG(task_name="Hopper-v2")
                             agent.train(
                                 total_episodes=tep,
                                 lstm_epochs=lstmep,
