@@ -15,7 +15,7 @@ class GymEnv(object):
         self.__configenv__()
         self.__config_transitions__()
     
-    def __configenv__(self):
+    def __configenv__(self):        
         self.env = gym.make(self.task)
         self.num_states = self.env.observation_space.shape[0]       
         self.num_actions = self.env.action_space.shape[0]
@@ -41,12 +41,22 @@ class GymEnv(object):
         ft.T_IDX_DONE = ft.T_IDX_Q+1
         ft.T_LENGTH = ft.ST_L+self.nActions+1+ft.ST_L+1+1
         ft.T_N_IDX= ft.T_LENGTH-1
+        
+        #ft.ST_L= self.env.observation_space.shape[0]
+        #ft.T_IDX_ST_1 = [0,ft.ST_L]
+        #ft.T_IDX_A    = ft.ST_L
+        #ft.T_IDX_R    = ft.T_IDX_A+1
+        #ft.T_IDX_ST   = [ft.T_IDX_R+1,(ft.T_IDX_R+1+ft.ST_L)]
+        #ft.T_IDX_Q    = ft.T_IDX_ST[1]
+        #ft.T_IDX_DONE = ft.T_IDX_Q+1
+        #ft.T_LENGTH = ft.ST_L+1+1+ft.ST_L+1+1
+        #ft.T_N_IDX= ft.T_LENGTH-1
         temp=0
     
     def step(self,action):
         action = np.array(action)
         action = action[0]
-        return self.env.step(action)
+        return self.env.step(action=action)
 
     def reset(self):
         return self.env.reset()

@@ -57,7 +57,8 @@ class Actor(BaseActorCritic):
         inputs = layers.Input(shape=(num_states,),name="actor_input")
         out = layers.Dense(256, activation="relu",name="actor_dense_1")(inputs)
         out = layers.Dense(256, activation="relu",name="actor_dense_2")(out)
-        outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)        
+        outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)
+        # Our upper bound is 2.0 for Pendulum.
         outputs = outputs * upper_bound
         self.model = tf.keras.Model(inputs, outputs)
 

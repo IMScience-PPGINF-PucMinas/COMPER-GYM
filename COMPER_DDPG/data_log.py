@@ -1,6 +1,6 @@
 from data import logger as train_logger
 from data import trial_logger as  trial_logger
-from data import evaluate_logger as eval_logger
+from data import eval_logger as eval_logger
 from datetime import datetime
 import os
 
