@@ -58,7 +58,7 @@ class COMPERDDPG(object):
 
     def _get_transition_components(self,transitions):
             st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
-            a = transitions[:,ft.T_IDX_A]
+            a = transitions[:,ft.T_IDX_A[0]:ft.T_IDX_A[1]]
             r = transitions[:,ft.T_IDX_R] # get rewards
             st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
             q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
@@ -77,9 +77,9 @@ class COMPERDDPG(object):
         transitions_batch=self.get_transitions_batch()        
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
         a = np.array(a)
-        a = a.reshape(a.shape[0],1)
+        #a = a.reshape(a.shape[0],1)
         r = np.array(r)
-        r = r.reshape(r.shape[0],1)
+        #r = r.reshape(r.shape[0],1)
         state_batch = tf.convert_to_tensor(st_1)
         action_batch = tf.convert_to_tensor(a)
         reward_batch = tf.convert_to_tensor(r)
@@ -145,10 +145,10 @@ class COMPERDDPG(object):
                             ep,itr,done,episodic_reward,(episodic_reward/itr),last_ep_avg_reward, avg_trial_rew)
                             
     def create_actor_critic(self):
-        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
 
-        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.target_critic = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
         
         self.target_actor.model.set_weights(self.actor_model.model.get_weights())
@@ -194,10 +194,12 @@ class COMPERDDPG(object):
             tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)                
             action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound)
             state, reward, done, info = self.env.step(action)      
-            a = np.array(action)
-            a = a.reshape(a.shape[0],1)
-            q = self.critic_model.forward([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(a)])#.numpy()
-
+            #a = np.array(action)
+            #a = a.reshape(a.shape[0],1)
+            
+            q = self.critic_model.forward([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)])#.numpy()
+            action = np.array(action)
+            action = action.reshape(action.shape[1])
             self.tm.add_transition(prev_state,action,reward,state,q,done)
             episodic_reward += reward       
 
@@ -261,7 +263,7 @@ def grid_search():
                             dt_string = now.strftime("%d-%m-%Y %H:%M:%S")                            
                             dlog.log_trial_data(trial,dt_string,tep,tqt,lstmep,start,upcritic,bs)
                             
-                            agent = COMPERDDPG()
+                            agent = COMPERDDPG(task_name='Hopper-v2')
                             agent.train(
                                 total_steps=tep,
                                 lstm_epochs=lstmep,
@@ -273,7 +275,23 @@ def grid_search():
                                 evaluate_frequency=evaluate_frequency,
                                 evaluate_epsodes=evaluate_epsodes)                        
 
+def test_gym():
+    env = gym.make('Hopper-v2')
+    for i_episode in range(20):
+        observation = env.reset()
+        for t in range(100):
+            #env.render()
+            print(observation)
+            action = env.action_space.sample()
+            observation, reward, done, info = env.step(action)
+            if done:
+                print("Episode finished after {} timesteps".format(t+1))
+                break
+    env.close()
+
+
 def main():
+    #test_gym()
     grid_search()
 
 if __name__ == "__main__":

@@ -45,20 +45,19 @@ class BaseActorCritic(object):
 
 
 class Actor(BaseActorCritic):
-    def __init__(self,num_states,upper_bound) -> None:
+    def __init__(self,num_states,upper_bound,num_actions) -> None:
         super().__init__()
         self.model = object
-        self.create(num_states,upper_bound)
+        self.create(num_states,upper_bound,num_actions)
         #self.compile_model()
     
     
-    def create(self,num_states,upper_bound):
+    def create(self,num_states,upper_bound,num_actions):
         last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         inputs = layers.Input(shape=(num_states,),name="actor_input")
         out = layers.Dense(256, activation="relu",name="actor_dense_1")(inputs)
         out = layers.Dense(256, activation="relu",name="actor_dense_2")(out)
-        outputs = layers.Dense(1, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)
-        # Our upper bound is 2.0 for Pendulum.
+        outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)        
         outputs = outputs * upper_bound
         self.model = tf.keras.Model(inputs, outputs)
 
@@ -113,8 +112,8 @@ class Critic(BaseActorCritic):
 
     
 
-def get_actor(num_states,upper_bound):
-    return Actor(num_states,upper_bound)
+def get_actor(num_states,upper_bound,num_actions):
+    return Actor(num_states,upper_bound,num_actions)
 
 
 def get_critic(num_states,num_actions):
