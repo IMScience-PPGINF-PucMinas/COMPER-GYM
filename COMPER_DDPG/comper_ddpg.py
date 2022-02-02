@@ -303,7 +303,7 @@ def grid_search():
     trainQTFreqquency=[100]    
     update_QTCritic_frequency=[100]
     q_lstm_bsize=[10000]    
-    trial=0
+    trial=2
     config_trial_logger()
 
     for tep in total_episodes:
