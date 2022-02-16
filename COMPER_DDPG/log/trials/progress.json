@@ -1,3 +1,1 @@
-{"Trial": 1, "Time": "27-01-2022 00:19:55", "TotalEp": 100, "Tqt": 100, "Lstmep": 500, "StartLearn": 1, "Upcritic": 100, "Qlstm_bs": 10000}
-{"Trial": 2, "Time": "29-01-2022 14:29:37", "TotalEp": 100, "Tqt": 100, "Lstmep": 500, "StartLearn": 1, "Upcritic": 100, "Qlstm_bs": 10000}
-{"Trial": 3, "Time": "31-01-2022 13:05:51", "TotalEp": 100, "Tqt": 100, "Lstmep": 500, "StartLearn": 1, "Upcritic": 100, "Qlstm_bs": 10000}
+{"Trial": 2, "Time": "16-02-2022 16:39:05", "TotalEp": 200, "Tqt": 4, "Lstmep": 15, "StartLearn": 1, "Upcritic": 1, "Qlstm_bs": 10000}
