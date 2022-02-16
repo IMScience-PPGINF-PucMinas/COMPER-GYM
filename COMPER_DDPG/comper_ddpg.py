@@ -14,6 +14,7 @@ from data import logger
 from data import trial_logger as tl
 from data import eval_logger as e_logger
 from datetime import datetime
+from collections import deque
 import os
 class COMPERDDPG(object):
     def __init__(self,task_name = "Pendulum-v1") -> None:
@@ -27,25 +28,27 @@ class COMPERDDPG(object):
         self.actor_model = object
         self.target_actor = object
         self.target_critic = object
-        self.critic_lr = 0.002
-        self.actor_lr = 0.001
+        self.critic_lr = 1e-3
+        self.actor_lr = 1e-4
         self.critic_optimizer = tf.keras.optimizers.Adam(self.critic_lr)
         self.actor_optimizer = tf.keras.optimizers.Adam(self.actor_lr)             
         self.gamma = 0.99       
-        self.tau = 0.005
+        self.tau = 0.001
+        self.train_log_path = "./log/"+self.task_name+"/train/"
+        self.eval_log_path = "./log/"+self.task_name+"/eval/"
 
 
-    def config_logger(self,base_log_dir = "./log/train/"):    
-        logger.session(base_log_dir).__enter__()
+    def config_train_logger(self):    
+        logger.session(self.train_log_path).__enter__()
         
 
-    def log(self,log_data_dict):
+    def train_log(self,log_data_dict):
         for k, v in log_data_dict:
             logger.logkv(k, v)
         logger.dumpkvs()
 
-    def config_eval_logger(self,base_log_dir = "./log/eval/"):    
-        e_logger.session(base_log_dir).__enter__()
+    def config_eval_logger(self):    
+        e_logger.session(self.eval_log_path).__enter__()
 
     def eval_log(self,log_data_dict):
         for k, v in log_data_dict:
@@ -160,9 +163,9 @@ class COMPERDDPG(object):
         
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
         a = np.array(a)
-        a = a.reshape(a.shape[0],1)
+        #a = a.reshape(a.shape[0],1)
         r = np.array(r)
-        r = r.reshape(r.shape[0],1)
+        #r = r.reshape(r.shape[0],1)
         state_batch = tf.convert_to_tensor(st_1)
         action_batch = tf.convert_to_tensor(a)
         reward_batch = tf.convert_to_tensor(r)
@@ -236,16 +239,14 @@ class COMPERDDPG(object):
 
 
     def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
-        logFrequency=100
-        base_log_dir="./log/train/"
-        rew_log_path = base_log_dir+"trial"+str(trial)+"/"
-        qlstm_log_path = rew_log_path+"lstm/"    
-        self.config_logger(rew_log_path)
+        logFrequency=100       
+        qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
+        self.config_train_logger()
         self.config_eval_logger()
-        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
 
-        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound)
+        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.target_critic = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
 
         # Making the weights equal initially
@@ -257,10 +258,8 @@ class COMPERDDPG(object):
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
                                     verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
-        # To store reward history of each episode
-        ep_reward_list = []
-        # To store average reward history of last few episodes
-        avg_reward_list = []
+        
+        ep_reward_list = deque(maxlen=100)
         log_itr=0
         count=0
         first_qt_trained = False
@@ -272,71 +271,67 @@ class COMPERDDPG(object):
             run =True
             while run:
                 itr+=1
-                # Uncomment this to see the Actor in action
-                # But not in a python notebook.
-                # env.render()
 
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
 
                 action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound)
-                # Recieve state and reward from environment.
+                
                 state, reward, done, info = self.env.step(action)      
-                a = np.array(action)
-                a = a.reshape(a.shape[0],1)
-                q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(a)]).numpy()
-
+                
+                q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)]).numpy()
+                action = np.array(action)
+                action = action.reshape(action.shape[1])
                 self.tm.add_transition(prev_state,action,reward,state,q,done)
                 episodic_reward += reward       
 
                 state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update2()
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)                
-                #if(not first_qt_trained):
-                                       
-                                
-                if (count % trainQTFreqquency == 0 and count > learningStartIter): 
-                    #print("train qt---->",count)
+                                                
+                if (count % trainQTFreqquency == 0 and count > learningStartIter):
                     first_qt_trained=True
                     self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
-                
-                if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):
-                        #print("update critic--->",count)
-                        self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
-                if(count % 10000 == 0):
+
+                if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                    
+                    self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
+
+                if((count >1) and (count % 5000 == 0)):
                     self.evaluate(trial,count)
 
                 count+=1
-
-                # End this episode when `done` is True
+               
                 if done:            
                     run=False
                 prev_state = state
 
                 if(done):
-                    avg_trial_rew = avg_reward = np.mean(ep_reward_list[-11:]) if len(ep_reward_list)>0 else 0            
+                    avg_trial_rew = avg_reward = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
+                    avg_10_trial_rew = avg_reward = np.mean(ep_reward_list[-10:]) if len(ep_reward_list)>0 else 0
                     log_itr+=1
                     now = datetime.now()        
                     dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
                     log_data_dict =[
-                    ('Count',log_itr),
+                    ("Trial",trial)
+                    ('LogCount',log_itr),
                     ('Task',self.task_name),
                     ('Time',dt_string),
+                    ('TotalItr',count),
                     ('TMCount',self.tm.__len__()),
                     ('RTMCount',self.rtm.__len__()),
                     ('Ep', ep),
-                    ('Itr', itr),
+                    ('EpItr', itr),
                     ("Done",done),
-                    ('Rew', episodic_reward),
-                    ('AvgEpRew', (episodic_reward/itr)),
-                    ('AvgLastEp', avg_trial_rew)]
-                    self.log(log_data_dict) 
+                    ('EpRew', episodic_reward),                    
+                    ('AvgLast100Ep', avg_trial_rew),
+                    ('AvgLast10Ep', avg_10_trial_rew)]
+                    self.train_log(log_data_dict) 
 
             ep_reward_list.append(episodic_reward)
 
             # Mean of last 40 episodes
-            avg_reward = np.mean(ep_reward_list[-40:])
+            avg_reward = np.mean(ep_reward_list[-10:])
             print("Episode * {} * Avg Reward is ==> {}".format(ep, avg_reward))
-            avg_reward_list.append(avg_reward)
+            
 
 
 def config_trial_logger(base_log_dir = "./log/trials/"):    
@@ -348,14 +343,15 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    total_episodes=[200]
+    task_name="Walker2d-v3"
+    total_episodes=[3000000]
     lstm_epochs=[15]
     learningStartIter=[1]    
     trainQTFreqquency=[4]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[10000]    
     trial=2
-    config_trial_logger()
+    config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
     for tep in total_episodes:
         for lstmep in lstm_epochs:
@@ -370,7 +366,7 @@ def grid_search():
                             ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
                             ('Qlstm_bs',bs)]
                             trial_log(log_data_dict)
-                            agent = COMPERDDPG()
+                            agent = COMPERDDPG(task_name=task_name)
                             agent.train(
                                 total_episodes=tep,
                                 lstm_epochs=lstmep,

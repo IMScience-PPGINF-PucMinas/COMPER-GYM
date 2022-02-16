@@ -1,5 +1,6 @@
 import gym
 from config.transitions import FrameTransition as ft
+import numpy as np
 
 class GymEnv(object):
     def __init__(self,task= "Pendulum-v1",verbose=True) -> None:
@@ -55,6 +56,8 @@ class GymEnv(object):
         #temp=0
     
     def step(self,action):
+        action = np.array(action)
+        action = action[0]
         return self.env.step(action=action)
 
     def reset(self):
