@@ -282,7 +282,7 @@ class COMPERDDPG(object):
                     now = datetime.now()        
                     dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
                     log_data_dict =[
-                    ("Trial",trial)
+                    ("Trial",trial),
                     ('LogCount',log_itr),
                     ('Task',self.task_name),
                     ('Time',dt_string),
