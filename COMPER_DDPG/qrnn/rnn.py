@@ -93,8 +93,8 @@ class RNN(object):
     def set_set_checkpoint_path(self,path):
         self.checkoint_path = path
 
-    def config_early_stopping(self,monitor="loss",patience=50):
-        self.early_stopping_callback = keras.callbacks.EarlyStopping(monitor=monitor,mode='min',verbose=1,patience=patience)
+    def config_early_stopping(self,monitor="loss",patience=5):
+        self.early_stopping_callback = keras.callbacks.EarlyStopping(monitor=monitor,mode='min',verbose=0,patience=patience)
         self.early_stopping =True
     
     def config_checkpoint(self):
