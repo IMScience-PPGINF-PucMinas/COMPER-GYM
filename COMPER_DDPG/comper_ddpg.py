@@ -19,7 +19,7 @@ class COMPERDDPG(object):
     def __init__(self,task_name = "Pendulum-v1") -> None:
         super().__init__()
         self.task_name = task_name
-        self.env = GymEnv(task_name)
+        self.env = GymEnv(self.task_name)
         self.tm = object
         self.rtm = object
         self.critic_model = object
@@ -109,13 +109,20 @@ class COMPERDDPG(object):
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
 
     def _get_transition_components(self,transitions):
-            st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
-            a = transitions[:,ft.T_IDX_A]
-            r = transitions[:,ft.T_IDX_R] # get rewards
-            st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
-            q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
-            done = transitions[:,ft.T_IDX_DONE] # get done signals
-            return st_1,a,r,st,q,done
+        st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
+        a = transitions[:,ft.T_IDX_A[0]:ft.T_IDX_A[1]]
+        r = transitions[:,ft.T_IDX_R] # get rewards
+        st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
+        q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
+        done = transitions[:,ft.T_IDX_DONE] # get done signals
+
+        #st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
+        #a = transitions[:,ft.T_IDX_A]
+        #r = transitions[:,ft.T_IDX_R] # get rewards
+        #st = transitions[:,ft.T_IDX_ST[0]:ft.T_IDX_ST[1]]
+        #q = transitions[:,ft.T_IDX_Q]# To ilustrate, but we do not need this here.
+        #done = transitions[:,ft.T_IDX_DONE] # get done signals
+        return st_1,a,r,st,q,done
 
     # We compute the loss and update parameters
     def comput_loss_and_update(self):
@@ -182,7 +189,7 @@ class COMPERDDPG(object):
             #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
             #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
             #y = reward_batch + gamma * target_predicted
-            y =self.qt.predict(target_predicted)
+            y =reward_batch + self.gamma * self.qt.predict(target_predicted)
 
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
@@ -347,7 +354,7 @@ def grid_search():
     trainQTFreqquency=[4]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[10000]    
-    trial=1
+    trial=2
     config_trial_logger()
 
     for tep in total_episodes:
