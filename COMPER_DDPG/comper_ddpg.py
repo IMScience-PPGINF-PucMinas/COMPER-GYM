@@ -260,6 +260,7 @@ class COMPERDDPG(object):
                                     verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
         
         ep_reward_list = deque(maxlen=100)
+        ten_ep_reward_list = deque(maxlen=10)
         log_itr=0
         count=0
         first_qt_trained = False
@@ -305,8 +306,8 @@ class COMPERDDPG(object):
                 prev_state = state
 
                 if(done):
-                    avg_trial_rew = avg_reward = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
-                    avg_10_trial_rew = avg_reward = np.mean(ep_reward_list[-10:]) if len(ep_reward_list)>0 else 0
+                    avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
+                    avg_10_trial_rew = np.mean(ten_ep_reward_list) if len(ten_ep_reward_list)>0 else 0
                     log_itr+=1
                     now = datetime.now()        
                     dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -327,10 +328,9 @@ class COMPERDDPG(object):
                     self.train_log(log_data_dict) 
 
             ep_reward_list.append(episodic_reward)
+            ten_ep_reward_list.append(episodic_reward)
 
-            # Mean of last 40 episodes
-            avg_reward = np.mean(ep_reward_list[-10:])
-            print("Episode * {} * Avg Reward is ==> {}".format(ep, avg_reward))
+            print("Episode * {} * Avg Reward is ==> {}".format(ep, np.mean(ten_ep_reward_list)))
             
 
 
