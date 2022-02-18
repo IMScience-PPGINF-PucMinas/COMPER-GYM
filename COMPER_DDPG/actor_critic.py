@@ -5,10 +5,12 @@ from config import parameters as param
 import os
 
 class BaseActorCritic(object):
-    def __init__(self) -> None:
+    def __init__(self,model_name,task_name) -> None:
         super().__init__()
         self.model = object
-        self.paramsidr="./"
+        self.paramdir="./"
+        self.model_name=model_name
+        self.task_name = task_name
     
 
     def forward(self,state):
@@ -22,10 +24,11 @@ class BaseActorCritic(object):
         #return pred
         return fop
 
-    def save_weights(self):
-        os.makedirs(self.paramsidr, exist_ok=True)
-        paramdir = self.paramsidr + '/dnn_weights.h5'
-        self.model.save_weights(paramdir)
+    def save_weights(self,paramdir):
+        self.paramdir = paramdir
+        os.makedirs(self.paramdir, exist_ok=True)
+        self.paramdir = self.paramdir+self.model_name+'.h5'
+        self.model.save_weights(self.paramdir)
         
     def load_weights(self):
         try:
@@ -45,8 +48,8 @@ class BaseActorCritic(object):
 
 
 class Actor(BaseActorCritic):
-    def __init__(self,num_states,upper_bound,num_actions) -> None:
-        super().__init__()
+    def __init__(self,task_name,num_states,upper_bound,num_actions) -> None:
+        super().__init__(model_name="actor",task_name=task_name)
         self.model = object
         self.create(num_states,upper_bound,num_actions)
         #self.compile_model()
@@ -73,8 +76,8 @@ class Actor(BaseActorCritic):
       
 
 class Critic(BaseActorCritic):
-    def __init__(self,num_states,num_actions) -> None:
-        super().__init__()
+    def __init__(self,task_name,num_states,num_actions) -> None:
+        super().__init__(model_name="critic",task_name=task_name)
         self.model = object
         self.create(num_states,num_actions)
         #self.compile_model()
@@ -113,9 +116,9 @@ class Critic(BaseActorCritic):
 
     
 
-def get_actor(num_states,upper_bound,num_actions):
-    return Actor(num_states,upper_bound,num_actions)
+def get_actor(task_name,num_states,upper_bound,num_actions):
+    return Actor(task_name,num_states,upper_bound,num_actions)
 
 
-def get_critic(num_states,num_actions):
-    return Critic(num_states,num_actions)
+def get_critic(task_name,num_states,num_actions):
+    return Critic(task_name,num_states,num_actions)

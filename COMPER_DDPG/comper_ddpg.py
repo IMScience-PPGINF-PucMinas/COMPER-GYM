@@ -36,6 +36,7 @@ class COMPERDDPG(object):
         self.tau = 0.001
         self.train_log_path = "./log/"+self.task_name+"/train/"
         self.eval_log_path = "./log/"+self.task_name+"/eval/"
+        self.checkpoint_path = "./log/"+self.task_name+"/checkpoint/"
 
 
     def config_train_logger(self):    
@@ -243,11 +244,11 @@ class COMPERDDPG(object):
         qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
         self.config_train_logger()
         self.config_eval_logger()
-        self.actor_model = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
-        self.critic_model = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
+        self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
+        self.critic_model = actor_critic.get_critic(self.task_name,self.env.num_states,self.env.num_actions)
 
-        self.target_actor = actor_critic.get_actor(self.env.num_states,self.env.upper_bound,self.env.num_actions)
-        self.target_critic = actor_critic.get_critic(self.env.num_states,self.env.num_actions)
+        self.target_actor = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
+        self.target_critic = actor_critic.get_critic(self.task_name,self.env.num_states,self.env.num_actions)
 
         # Making the weights equal initially
         self.target_actor.model.set_weights(self.actor_model.model.get_weights())
@@ -298,7 +299,8 @@ class COMPERDDPG(object):
 
                 if((count >1) and (count % 5000 == 0)):
                     self.evaluate(trial,count)
-
+                    self.actor_model.save_weights(self.checkpoint_path)
+                    
                 count+=1
                
                 if done:            
