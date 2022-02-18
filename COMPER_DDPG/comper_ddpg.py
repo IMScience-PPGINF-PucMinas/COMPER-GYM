@@ -56,8 +56,8 @@ class COMPERDDPG(object):
         e_logger.dumpkvs()
 
     def config_memories(self):               
-        self.tm = TM(max_size=100000,name="tm", memory_dir="./")
-        self.rtm  = RTM(max_size=100000,name="rtm",memory_dir="/.")
+        self.tm = TM(max_size=1000000,name="tm", memory_dir="./")
+        self.rtm  = RTM(max_size=1000000,name="rtm",memory_dir="/.")
             
 
     # Eager execution is turned on by default in TensorFlow 2. Decorating with tf.function allows
@@ -343,7 +343,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Walker2d-v3"
+    task_name="Ant-v3"
     total_episodes=[3000000]
     lstm_epochs=[15]
     learningStartIter=[1]    
