@@ -287,8 +287,7 @@ class COMPERDDPG(object):
                 episodic_reward += reward       
 
                 state_batch, action_batch, reward_batch,next_state_batch,transitions=self.comput_loss_and_update2()
-                self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
-                self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)                
+                                
                                                 
                 if (count % trainQTFreqquency == 0 and count > learningStartIter):
                     first_qt_trained=True
@@ -297,9 +296,14 @@ class COMPERDDPG(object):
                 if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                    
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
 
+                
                 if((count >1) and (count % 5000 == 0)):
                     self.evaluate(trial,count)
                     self.actor_model.save_weights(self.checkpoint_path)
+                
+                self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
+                self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
+
                     
                 count+=1
                
@@ -345,11 +349,11 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Ant-v3"
+    task_name="Hopper-v3"
     total_episodes=[3000000]
     lstm_epochs=[15]
     learningStartIter=[1]    
-    trainQTFreqquency=[4]    
+    trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[10000]    
     trial=2
