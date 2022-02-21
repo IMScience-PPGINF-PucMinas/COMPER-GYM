@@ -10,6 +10,7 @@ from memory.rtm.reduced_transitions_memory import ReducedTransitionsMemory as RT
 from config.transitions import FrameTransition as ft 
 from qrnn.q_lstm_gscale import QLSTMGSCALE
 from environment.env import GymEnv
+from action_exploration import OUActionNoise
 from data import logger
 from data import trial_logger as tl
 from data import eval_logger as e_logger
@@ -30,6 +31,7 @@ class COMPERDDPG(object):
         self.target_critic = object
         self.critic_lr = 1e-3
         self.actor_lr = 1e-4
+        self.noise_object = None
         self.critic_optimizer = tf.keras.optimizers.Adam(self.critic_lr)
         self.actor_optimizer = tf.keras.optimizers.Adam(self.actor_lr)             
         self.gamma = 0.99       
@@ -59,6 +61,10 @@ class COMPERDDPG(object):
     def config_memories(self):               
         self.tm = TM(max_size=1000000,name="tm", memory_dir="./")
         self.rtm  = RTM(max_size=1000000,name="rtm",memory_dir="/.")
+    
+    def config_noise_object(self):
+        std_dev = 0.2
+        self.noise_object = OUActionNoise(mean=np.zeros(1), std_deviation=float(std_dev) * np.ones(1))
             
 
     # Eager execution is turned on by default in TensorFlow 2. Decorating with tf.function allows
@@ -255,6 +261,8 @@ class COMPERDDPG(object):
         self.target_critic.model.set_weights(self.critic_model.model.get_weights())
 
         self.config_memories()
+        self.config_noise_object()
+
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
@@ -276,7 +284,7 @@ class COMPERDDPG(object):
 
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
 
-                action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound)
+                action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound,self.noise_object)
                 
                 state, reward, done, info = self.env.step(action)      
                 
