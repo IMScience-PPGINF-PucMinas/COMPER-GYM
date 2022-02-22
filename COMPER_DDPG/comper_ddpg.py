@@ -357,7 +357,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Hopper-v3"
+    task_name="Ant-v3"
     total_episodes=[3000000]
     lstm_epochs=[15]
     learningStartIter=[1]    
