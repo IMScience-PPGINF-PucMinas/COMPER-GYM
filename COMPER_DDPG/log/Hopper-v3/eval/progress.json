@@ -1,5 +1,0 @@
-{"Trial": 3, "Time": "21-02-2022 18:42:43", "Task": "Hopper-v3", "Int": 5000, "EvalAvgRew": 1.8369311232210153}
-{"Trial": 3, "Time": "21-02-2022 23:03:35", "Task": "Hopper-v3", "Int": 10000, "EvalAvgRew": 1.8111012006038063}
-{"Trial": 3, "Time": "22-02-2022 03:28:42", "Task": "Hopper-v3", "Int": 15000, "EvalAvgRew": 1.8139741886725063}
-{"Trial": 3, "Time": "22-02-2022 07:51:41", "Task": "Hopper-v3", "Int": 20000, "EvalAvgRew": 1.8218852435302868}
-{"Trial": 3, "Time": "22-02-2022 12:16:40", "Task": "Hopper-v3", "Int": 25000, "EvalAvgRew": 1.7729702644315404}
