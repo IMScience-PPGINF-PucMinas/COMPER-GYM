@@ -20,3 +20,14 @@ def get_action_no_noise(state,actor_model,lower_bound, upper_bound):
     legal_action = np.clip(sampled_actions, lower_bound, upper_bound)
 
     return [np.squeeze(legal_action)]
+
+class Epsilon(object):
+    def __init__(self, schedule_timesteps, final_p, initial_p):
+        self.schedule_timesteps = schedule_timesteps
+        self.final_p = final_p
+        self.initial_p = initial_p
+
+    def value(self, t):        
+        fraction = min(1.0, float(t) / self.schedule_timesteps)
+        #return self.initial_p + (self.final_p - self.initial_p) * fraction
+        return self.initial_p + (self.initial_p+self.final_p) * fraction

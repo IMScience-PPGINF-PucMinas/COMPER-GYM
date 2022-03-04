@@ -17,6 +17,7 @@ from data import eval_logger as e_logger
 from datetime import datetime
 from collections import deque
 import os
+from policy import Epsilon
 class COMPERDDPG(object):
     def __init__(self,task_name = "Pendulum-v1") -> None:
         super().__init__()
@@ -39,6 +40,9 @@ class COMPERDDPG(object):
         self.train_log_path = "./log/"+self.task_name+"/train/"
         self.eval_log_path = "./log/"+self.task_name+"/eval/"
         self.checkpoint_path = "./log/"+self.task_name+"/checkpoint/"
+        self.epsilonInitial = 0.01
+        self.epsilonFinal = 1.0     
+        self.epsilonFraction = 0.20099
 
 
     def config_train_logger(self):    
@@ -65,7 +69,11 @@ class COMPERDDPG(object):
     def config_noise_object(self):
         std_dev = 0.2
         self.noise_object = OUActionNoise(mean=np.zeros(1), std_deviation=float(std_dev) * np.ones(1))
-            
+    
+    def __schedule_epsilon(self):
+        self.epsilon = Epsilon(schedule_timesteps=int(self.epsilonFraction * 100000),initial_p=self.epsilonInitial,final_p=self.epsilonFinal)
+
+
 
     # Eager execution is turned on by default in TensorFlow 2. Decorating with tf.function allows
     # TensorFlow to build a static graph out of the logic and computations in our function.
@@ -193,13 +201,11 @@ class COMPERDDPG(object):
         return state_batch, action_batch, reward_batch,next_state_batch,transitions
 
     #@tf.function
-    def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted):
+    def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
         with tf.GradientTape() as tape:
-            #target_actions = target_actor.model(next_state_batch, training=True)
-            #y = reward_batch + gamma * target_critic.model([next_state_batch, target_actions], training=True)        
-            #y = reward_batch + self.gamma * self.qt.lstm.lstm(target_predicted)
-            #y = reward_batch + gamma * target_predicted
-            y =reward_batch + self.gamma * self.qt.predict(target_predicted)
+            e = self.epsilon.value(itr)
+            #print(e)           
+            y =reward_batch + e * self.qt.predict(target_predicted)
 
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
@@ -246,7 +252,8 @@ class COMPERDDPG(object):
 
 
     def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
-        logFrequency=100       
+        logFrequency=100
+        self.__schedule_epsilon()       
         qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
         self.config_train_logger()
         self.config_eval_logger()
@@ -302,7 +309,7 @@ class COMPERDDPG(object):
                     self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
 
                 if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                    
-                    self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions)
+                    self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
 
                 
                 if((count >1) and (count % 5000 == 0)):
@@ -320,6 +327,7 @@ class COMPERDDPG(object):
                 prev_state = state
 
                 if(done):
+                    e = self.epsilon.value(count)
                     avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
                     avg_10_trial_rew = np.mean(ten_ep_reward_list) if len(ten_ep_reward_list)>0 else 0
                     log_itr+=1
@@ -333,6 +341,7 @@ class COMPERDDPG(object):
                     ('TotalItr',count),
                     ('TMCount',self.tm.__len__()),
                     ('RTMCount',self.rtm.__len__()),
+                    ('e',e),
                     ('Ep', ep),
                     ('EpItr', itr),
                     ("Done",done),
@@ -357,14 +366,14 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Ant-v3"
+    task_name="HalfCheetah-v3"
     total_episodes=[3000000]
     lstm_epochs=[15]
     learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[10000]    
-    trial=2
+    trial=1
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
     for tep in total_episodes:
