@@ -7,7 +7,7 @@ class GymEnv(object):
         super().__init__()
         self.verbose = verbose
         self.task =task
-        self.env = None
+        self.gym_env = None
         self.num_states=None
         self.num_actions = None
         self.upper_bound=0
@@ -16,11 +16,11 @@ class GymEnv(object):
         self.__config_transitions__()
     
     def __configenv__(self):        
-        self.env = gym.make(self.task)
-        self.num_states = self.env.observation_space.shape[0]       
-        self.num_actions = self.env.action_space.shape[0]
-        self.upper_bound = self.env.action_space.high[0]
-        self.lower_bound = self.env.action_space.low[0]
+        self.gym_env = gym.make(self.task)
+        self.num_states = self.gym_env.observation_space.shape[0]       
+        self.num_actions = self.gym_env.action_space.shape[0]
+        self.upper_bound = self.gym_env.action_space.high[0]
+        self.lower_bound = self.gym_env.action_space.low[0]
 
         if(self.verbose):
             print("Environment Data for ->  {}".format(self.task))
@@ -30,9 +30,9 @@ class GymEnv(object):
             print("Size of Lower Bound of Action ->  {}".format(self.lower_bound))
     
     def __config_transitions__(self):              
-        self.actions = self.env.action_space
+        self.actions = self.gym_env.action_space
         self.nActions = self.actions.sample().shape[0]
-        ft.ST_L= self.env.observation_space.shape[0]
+        ft.ST_L= self.gym_env.observation_space.shape[0]
         ft.T_IDX_ST_1 = [0,ft.ST_L]
         ft.T_IDX_A    = [ft.ST_L,(ft.ST_L+self.nActions)]
         ft.T_IDX_R    = ft.T_IDX_A[1]
@@ -42,9 +42,9 @@ class GymEnv(object):
         ft.T_LENGTH = ft.ST_L+self.nActions+1+ft.ST_L+1+1
         ft.T_N_IDX= ft.T_LENGTH-1
         
-        #self.actions = self.env.action_space
+        #self.actions = self.gym_env.action_space
         #self.nActions = self.actions.sample().shape[0]
-        #ft.ST_L= self.env.observation_space.shape[0]
+        #ft.ST_L= self.gym_env.observation_space.shape[0]
         #ft.T_IDX_ST_1 = [0,ft.ST_L]
         #ft.T_IDX_A    = ft.ST_L
         #ft.T_IDX_R    = ft.T_IDX_A+1
@@ -56,12 +56,12 @@ class GymEnv(object):
         #temp=0
     
     def step(self,action):
-        action = np.array(action)
-        action = action[0]
-        return self.env.step(action=action)
+        #action = np.array(action)
+        #action = action[0]       
+        return self.gym_env.step(action)
 
     def reset(self):
-        return self.env.reset()
+        return self.gym_env.reset()
 
 
 
