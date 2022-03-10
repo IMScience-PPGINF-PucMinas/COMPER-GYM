@@ -144,8 +144,29 @@ class COMPERDDPG(object):
     #@tf.function
     def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
         with tf.GradientTape() as tape:
+            e = self.epsilon.value(itr)
+            y = self.qt.predict(target_predicted)
+            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
+
+    def update_critic_target2(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
+        with tf.GradientTape() as tape:
             e = self.epsilon.value(itr)                      
-            #y =reward_batch + (1.0-e) * self.qt.predict(target_predicted)
+            y =reward_batch + (1.0-e) * self.qt.predict(target_predicted)
+            y = self.qt.predict(target_predicted)
+            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
+    
+    def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
+        with tf.GradientTape() as tape:
+            e = self.epsilon.value(itr)                      
+            y =reward_batch + self.gamma * self.qt.predict(target_predicted)
             y = self.qt.predict(target_predicted)
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
@@ -191,7 +212,7 @@ class COMPERDDPG(object):
 
 
 
-    def train(self,total_episodes=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
+    def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
         
         self.__schedule_epsilon()       
         qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
@@ -219,11 +240,13 @@ class COMPERDDPG(object):
         log_itr=0
         count=0
         first_qt_trained = False
-        for ep in range(total_episodes):
+        ep=0
+        while (count<=tota_iterations):
             prev_state = self.env.reset()
             episodic_reward = 0
             itr = 1   
             run =True
+            ep+=1
             while run:
                 itr+=1
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
@@ -248,7 +271,8 @@ class COMPERDDPG(object):
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
                 
                 if((count >1) and (count % 5000 == 0)):
-                    #self.evaluate(trial,count)
+                    self.evaluate(trial,count)
+                    self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
                     self.actor_model.save_weights(self.checkpoint_path)
                 
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
@@ -295,16 +319,16 @@ def trial_log(log_data_dict):
 
 def grid_search():
     task_name="Pendulum-v1"
-    total_episodes=[200]
+    tota_iterations=[1000000]
     lstm_epochs=[15]
-    learningStartIter=[100000]    
+    learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[100000]    
-    trial=1
+    trial=2
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
-    for tep in total_episodes:
+    for tep in tota_iterations:
         for lstmep in lstm_epochs:
             for tqt in trainQTFreqquency:
                 for start in learningStartIter:
@@ -319,7 +343,7 @@ def grid_search():
                             trial_log(log_data_dict)
                             agent = COMPERDDPG(task_name=task_name)
                             agent.train(
-                                total_episodes=tep,
+                                tota_iterations=tep,
                                 lstm_epochs=lstmep,
                                 trainQTFreqquency=tqt,
                                 learningStartIter= start,
