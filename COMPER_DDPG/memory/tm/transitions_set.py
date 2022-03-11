@@ -64,7 +64,8 @@ class TSet(object):
         size = self.__check_size(size)
         samp=defaultdict(list)
         try:
-            idxes = sorted(random.sample(range(0,self.len()),size))            
+            #idxes = sorted(random.sample(range(0,self.len()),size))
+            idxes = np.random.choice(range(0,self.len()), size)
             keys = np.array(list(self.sets.keys()))
             keys = keys[idxes]
             for k in keys:

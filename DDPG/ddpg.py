@@ -2,9 +2,9 @@ import gym
 import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
-import matplotlib.pyplot as plt
 
-tf.enable_eager_execution() 
+
+#tf.enable_eager_execution() 
 
 
 problem = "Pendulum-v1"#"Hopper-v2"
@@ -255,7 +255,7 @@ for ep in range(total_episodes):
 
 # Plotting graph
 # Episodes versus Avg. Rewards
-plt.plot(avg_reward_list)
-plt.xlabel("Episode")
-plt.ylabel("Avg. Epsiodic Reward")
-plt.show()
+#plt.plot(avg_reward_list)
+#plt.xlabel("Episode")
+#plt.ylabel("Avg. Epsiodic Reward")
+#plt.show()

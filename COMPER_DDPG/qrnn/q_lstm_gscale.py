@@ -78,20 +78,18 @@ class QLSTMGSCALE(object):
         try:
             transition_features = self.transitions_memory.load_transitions_batch_as_features_array(bsize=self.transitions_default_batch_size,normalizeFromMean=True)
             self.transitions_real_batch_size = len(transition_features)
-            transformed = self.transform_transitions(transition_features, 1, 1)           
-            if(self.verbose):                
-                print("\n transformed", transformed.shape)
-                print(transformed.head(5))
-                
-            transformed.drop(transformed.columns[self.features_to_drop], axis=1, inplace=True)
-
+            
+            #transformed = self.transform_transitions(transition_features, 1, 1)           
+            #if(self.verbose):                
+            #    print("\n transformed", transformed.shape)
+            #    print(transformed.head(5))
+            transformed = pd.DataFrame(transition_features)
             if(self.verbose):                
                 print("\n droped columns", transformed.shape)
-                print(transformed.head(5))
-            values_col=transformed.columns.values[-1]
-            values = transformed[values_col].to_numpy()
+                print(transformed.head(5))            
+            values = transformed[ft.T_IDX_Q].to_numpy()
             values = values.reshape(values.shape[0],1)
-            transformed.drop([values_col], axis=1,inplace=True)
+            transformed.drop([ft.T_IDX_Q], axis=1,inplace=True)
             transformed = transformed.to_numpy()
             
             transformed = self.scaler.fit_transform(transformed)
