@@ -215,7 +215,8 @@ class COMPERDDPG(object):
     def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
         
         self.__schedule_epsilon()       
-        qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
+        qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"
+        self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"    
         self.config_train_logger()
         self.config_eval_logger()
         self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
@@ -271,9 +272,8 @@ class COMPERDDPG(object):
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
                 
                 if((count >1) and (count % 5000 == 0)):
-                    self.evaluate(trial,count)
-                    self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
-                    self.actor_model.save_weights(self.checkpoint_path)
+                    self.evaluate(trial,count)                    
+                    self.actor_model.save_weights(self.checkpoint_path+str(count)+"/")
                 
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
@@ -307,6 +307,8 @@ class COMPERDDPG(object):
             ('AvgLast100Ep', avg_trial_rew),
             ('AvgLast10Ep', avg_10_trial_rew)]
             self.train_log(log_data_dict)
+        self.evaluate(trial,count)                    
+        self.actor_model.save_weights(self.checkpoint_path+str(count)+"/")
 
 
 def config_trial_logger(base_log_dir = "./log/trials/"):    
@@ -325,7 +327,7 @@ def grid_search():
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[100000]    
-    trial=2
+    trial=1
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
     for tep in tota_iterations:
