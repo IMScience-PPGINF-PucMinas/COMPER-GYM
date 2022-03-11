@@ -209,10 +209,8 @@ class COMPERDDPG(object):
             ('Int',iterations),
             ('EvalAvgRew',avg_trial_rew)]
         self.eval_log(log_data_dict)
-
-
-
-    def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
+        
+    def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1,makes_transitions_shift=False):
         
         self.__schedule_epsilon()       
         qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"
@@ -235,7 +233,8 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
+                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,
+                                    target_early_stopping=True,makes_transitions_shift=makes_transitions_shift)
         
         ep_reward_list = []        
         log_itr=0
@@ -326,7 +325,8 @@ def grid_search():
     learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
-    q_lstm_bsize=[100000]    
+    q_lstm_bsize=[100000]
+    makes_transitions_shift=False    
     trial=1
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
@@ -351,7 +351,8 @@ def grid_search():
                                 learningStartIter= start,
                                 update_QTCritic_frequency=upcritic,
                                 q_lstm_bsize=bs,
-                                trial=trial)                        
+                                trial=trial,
+                                makes_transitions_shift=makes_transitions_shift)                        
 
 def main():
     grid_search()

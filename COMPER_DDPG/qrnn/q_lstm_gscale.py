@@ -14,7 +14,7 @@ from config.transitions import FrameTransition as ft
 
 
 class QLSTMGSCALE(object):
-    def __init__(self, transitions_memory, reduced_transitions_memory, inputshapex=1, inputshapey=35, outputdim=1, verbose=False, transition_batch_size=64, netparamsdir='./', target_optimizer='rmsprop', log_dir="",log_train=True,target_early_stopping=False):
+    def __init__(self, transitions_memory, reduced_transitions_memory, inputshapex=1, inputshapey=35, outputdim=1, verbose=False, transition_batch_size=64, netparamsdir='./', target_optimizer='rmsprop', log_dir="",log_train=True,target_early_stopping=False, makes_transitions_shift=False):
 
         self.train_loss_history = list()
         self.train_val_loss_history = list()
@@ -35,6 +35,7 @@ class QLSTMGSCALE(object):
         self.outputdim = outputdim
         self.logDir = log_dir
         self.logTrain = log_train
+        self.makes_transitions_shift =  makes_transitions_shift
         self.trainPredictionCount = 0
         self.features_to_drop = []
 
@@ -74,15 +75,16 @@ class QLSTMGSCALE(object):
         self.lstm.save_states()
     
     def __load_transition_featrues_from_memory(self):
+        if(self.makes_transitions_shift):
+            return self.__load_shift_transition_featrues_from_memory()
+        else:
+            return self.__load_no_shifit_transition_featrues_from_memory()
+    
+    def __load_no_shifit_transition_featrues_from_memory(self):
 
         try:
             transition_features = self.transitions_memory.load_transitions_batch_as_features_array(bsize=self.transitions_default_batch_size,normalizeFromMean=True)
             self.transitions_real_batch_size = len(transition_features)
-            
-            #transformed = self.transform_transitions(transition_features, 1, 1)           
-            #if(self.verbose):                
-            #    print("\n transformed", transformed.shape)
-            #    print(transformed.head(5))
             transformed = pd.DataFrame(transition_features)
             if(self.verbose):                
                 print("\n droped columns", transformed.shape)
@@ -95,8 +97,6 @@ class QLSTMGSCALE(object):
             transformed = self.scaler.fit_transform(transformed)
             transformed = np.concatenate((transformed,values),axis=1)
             transformed = pd.DataFrame(transformed)
-            
-
             if(self.verbose):
                 print("\n final transitions", transformed.shape)
                 print(transformed.head(5))
@@ -107,6 +107,38 @@ class QLSTMGSCALE(object):
             print(type(e),e)           
             raise(e)
     
+    def __load_shift_transition_featrues_from_memory(self):
+        try:
+            transition_features = self.transitions_memory.load_transitions_batch_as_features_array(bsize=self.transitions_default_batch_size,normalizeFromMean=True)
+            self.transitions_real_batch_size = len(transition_features)
+            transformed = self.transform_transitions(transition_features, 1, 1)           
+            if(self.verbose):                
+                print("\n transformed", transformed.shape)
+                print(transformed.head(5))
+                
+            transformed.drop(transformed.columns[self.features_to_drop], axis=1, inplace=True)
+            if(self.verbose):                
+                print("\n droped columns", transformed.shape)
+                print(transformed.head(5))
+
+            values_col=transformed.columns.values[-1]
+            values = transformed[values_col].to_numpy()
+            values = values.reshape(values.shape[0],1)
+            transformed.drop([values_col], axis=1,inplace=True)
+            transformed = transformed.to_numpy()            
+            transformed = self.scaler.fit_transform(transformed)
+            transformed = np.concatenate((transformed,values),axis=1)
+            transformed = pd.DataFrame(transformed)
+            if(self.verbose):
+                print("\n final transitions", transformed.shape)
+                print(transformed.head(5))
+
+            return transformed
+
+        except Exception as e:
+            print(type(e),e)           
+            raise(e)
+
     def transform_transitions(self, transitions, n_in=1, n_out=1, dropnan=True):
         try:
             #n_vars = 1 if type(transitions) is list else transitions.shape[1]
