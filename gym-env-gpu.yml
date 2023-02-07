@@ -1,4 +1,4 @@
-name: gym-env
+name: gym-env-gpu
 channels:
   - conda-forge
   - defaults
@@ -135,4 +135,4 @@ dependencies:
     - monotonic==1.6
     - numpy==1.22.2
     - pillow==9.0.1
-prefix: /home/daniel/miniconda3/envs/gym-env
+prefix: /home/daniel/miniconda3/envs/gym-env-gpu
