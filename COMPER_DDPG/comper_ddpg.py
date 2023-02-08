@@ -337,7 +337,7 @@ def grid_search():
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[100000]
     makes_transitions_shift=False
-    update_critic_target_type=1
+    update_critic_target_type=3
     total_trails = 5
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 

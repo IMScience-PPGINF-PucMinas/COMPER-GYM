@@ -1,0 +1,1 @@
+{"Trial": 1, "LogCount": 1, "Task": "Pendulum-v1", "Time": "07-02-2023 21:26:20", "TotalItr": 200, "TMCount": 0, "RTMCount": 200, "e": 0.009940793074282306, "Ep": 1, "EpItr": 201, "Done": true, "EpRew": -859.520053147856, "AvgLastEp": -859.520053147856, "AvgLast100Ep": -859.520053147856, "AvgLast50Ep": -859.520053147856, "AvgLast10Ep": -859.520053147856}

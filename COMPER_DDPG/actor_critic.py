@@ -58,8 +58,11 @@ class Actor(BaseActorCritic):
     def create(self,num_states,upper_bound,num_actions):
         last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         inputs = layers.Input(shape=(num_states,),name="actor_input")
-        out = layers.Dense(256, activation="relu",name="actor_dense_1")(inputs)
+        out = layers.BatchNormalization()(inputs)
+        out = layers.Dense(256, activation="relu",name="actor_dense_1")(out)
+        out = layers.BatchNormalization()(out)
         out = layers.Dense(256, activation="relu",name="actor_dense_2")(out)
+        out = layers.BatchNormalization()(out)
         outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)
         # Our upper bound is 2.0 for Pendulum.
         outputs = outputs * upper_bound
@@ -83,10 +86,11 @@ class Critic(BaseActorCritic):
         #self.compile_model()
     
     def create(self,num_states,num_actions):
-        # State as input        
-         # State as input
+        # State as input                 
         state_input = layers.Input(shape=(num_states),name="critic_st_input")
+        state_out = layers.BatchNormalization()(state_input)
         state_out = layers.Dense(16, activation="relu",name="critic_st_dense1")(state_input)
+        state_out = layers.BatchNormalization()(state_out)
         state_out = layers.Dense(32, activation="relu",name="critic_st_dense2")(state_out)
 
         # Action as input
