@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 from config.transitions import FrameTransition as ft
 import numpy as np
 
