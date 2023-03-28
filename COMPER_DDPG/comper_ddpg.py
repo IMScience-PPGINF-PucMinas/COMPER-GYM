@@ -76,9 +76,9 @@ class COMPERDDPG(object):
         # Training and updating Actor & Critic networks.
         # See Pseudo Code.
         with tf.GradientTape() as tape:
-            target_actions = self.target_actor.model(next_state_batch, training=True)
+            target_actions = self.target_actor.model(next_state_batch)
             y = reward_batch + self.gamma * self.target_critic.model([next_state_batch, target_actions], training=True)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_value = self.critic_model.model([state_batch, action_batch])
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
         critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
@@ -90,9 +90,20 @@ class COMPERDDPG(object):
             # Used `-value` as we want to maximize the value given
             # by the critic for our actions
             actor_loss = -tf.math.reduce_mean(critic_value)
-
+            
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
+    
+       
+        
+    def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
+        with tf.GradientTape() as tape:                                 
+            y =reward_batch + self.gamma * self.qt.predict(target_predicted)            
+            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
 
     def _get_transition_components(self,transitions):
         st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
@@ -141,42 +152,10 @@ class COMPERDDPG(object):
         
         return state_batch, action_batch, reward_batch,next_state_batch,transitions
 
-    #@tf.function
-    def update_critic_target1(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
-        with tf.GradientTape() as tape:            
-            y = self.qt.predict(target_predicted)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
-
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
-
-    def update_critic_target2(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
-        with tf.GradientTape() as tape:
-            e = self.epsilon.value(itr)                      
-            y =reward_batch + (1.0-e) * self.qt.predict(target_predicted)            
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
-
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
-    
-    def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
-        with tf.GradientTape() as tape:                            
-            y =reward_batch + self.gamma * self.qt.predict(target_predicted)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
-
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
+ 
     
     def update_critic_target(self,state_batch, action_batch, reward_batch,next_state_batch,transitions,count,type=1):
-        if(type==1):
-            self.update_critic_target1(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
-        elif(type==2):
-            self.update_critic_target2(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
-        elif(type==3):
-            self.update_critic_target3(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
+        self.update_critic_target3(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
 
 
     # This update target parameters slowly
@@ -239,7 +218,7 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,
+                                    verbose=True,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,
                                     target_early_stopping=True,makes_transitions_shift=makes_transitions_shift)
         
         ep_reward_list = []        
@@ -331,8 +310,8 @@ def trial_log(log_data_dict):
 def grid_search():
     task_name="Pendulum-v1"
     tota_iterations=[100000]
-    lstm_epochs=[10]
-    learningStartIter=[100]    
+    lstm_epochs=[15]
+    learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[1000]
