@@ -61,11 +61,11 @@ class Actor(BaseActorCritic):
         self.model = Sequential([
             layers.InputLayer(input_shape=(num_states,),name="actor_input"),
             layers.BatchNormalization(),
-            layers.Dense(256, activation="relu",name="actor_dense_1"),
+            layers.Dense(400, activation="relu",name="actor_dense_1"),
             layers.BatchNormalization(),
-            layers.Dense(256, activation="relu",name="actor_dense_2"),
+            layers.Dense(300, activation="relu",name="actor_dense_2"),
             layers.BatchNormalization(),
-            layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")           
+            layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")          
             
         ])   
     
@@ -104,9 +104,9 @@ class Critic(BaseActorCritic):
         # State as input                 
         state_input = layers.Input(shape=(num_states),name="critic_st_input")
         state_out = layers.BatchNormalization()(state_input)
-        state_out = layers.Dense(16, activation="relu",name="critic_st_dense1")(state_input)
+        state_out = layers.Dense(400, activation="relu",name="critic_st_dense1")(state_input)
         state_out = layers.BatchNormalization()(state_out)
-        state_out = layers.Dense(32, activation="relu",name="critic_st_dense2")(state_out)
+        state_out = layers.Dense(300, activation="relu",name="critic_st_dense2")(state_out)
 
         # Action as input
         action_input = layers.Input(shape=(num_actions),name="critic_act_input")       

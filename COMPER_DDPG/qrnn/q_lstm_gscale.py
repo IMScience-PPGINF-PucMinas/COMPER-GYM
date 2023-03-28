@@ -19,7 +19,7 @@ class QLSTMGSCALE(object):
         self.train_loss_history = list()
         self.train_val_loss_history = list()
         self.train_val_rmse_history = list()
-        self.scaler = MinMaxScaler(feature_range=(0, 1))        
+        self.scaler = MinMaxScaler(feature_range=(-1, 1))        
         self.lstm_bacth_size = 32
         self.transitions_default_batch_size = transition_batch_size
         self.transitions_real_batch_size = 0

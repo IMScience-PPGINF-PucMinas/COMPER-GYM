@@ -1,4 +1,4 @@
-import gymnasium as gym
+import gym
 import tensorflow as tf
 import numpy as np
 #import matplotlib.pyplot as plt
@@ -330,12 +330,12 @@ def trial_log(log_data_dict):
 
 def grid_search():
     task_name="Pendulum-v1"
-    tota_iterations=[1000000]
-    lstm_epochs=[15]
-    learningStartIter=[1]    
+    tota_iterations=[100000]
+    lstm_epochs=[10]
+    learningStartIter=[100]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
-    q_lstm_bsize=[100000]
+    q_lstm_bsize=[1000]
     makes_transitions_shift=False
     update_critic_target_type=3
     total_trails = 5
