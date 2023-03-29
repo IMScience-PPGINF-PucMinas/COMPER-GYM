@@ -16,7 +16,7 @@ class RNN(object):
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =RMSprop(learning_rate=0.001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =RMSprop(learning_rate=0.0001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
         self.early_stopping_callback=None
         self.model_checkpoint_callback = None
         self.checkoint_path = "./"
@@ -35,9 +35,12 @@ class RNN(object):
     def create_lstm(self):
         last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         self.lstm = Sequential()                
-        self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(self.inputshapex,self.inputshapey),activation='tanh'))
-        self.lstm.add(LSTM(128,return_sequences=True,activation='tanh'))
-        self.lstm.add(LSTM(128,activation='tanh'))              
+        self.optimizer=='adam'
+        #self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(self.inputshapex,self.inputshapey),activation='tanh'))
+        #self.lstm.add(LSTM(128,return_sequences=True,activation='tanh'))
+        self.lstm.add(LSTM(32,activation='tanh',input_shape=(self.inputshapex,self.inputshapey)))                
+        self.lstm.add(Dense(256,activation="relu"))
+        self.lstm.add(Dense(256,activation="relu"))                             
         self.lstm.add(Dense(1,kernel_initializer=last_init))
 
          

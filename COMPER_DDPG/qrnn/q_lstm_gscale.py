@@ -19,7 +19,7 @@ class QLSTMGSCALE(object):
         self.train_loss_history = list()
         self.train_val_loss_history = list()
         self.train_val_rmse_history = list()
-        self.scaler = MinMaxScaler(feature_range=(-1, 1))        
+        self.scaler = MinMaxScaler(feature_range=(0, 1))        
         self.lstm_bacth_size = 32
         self.transitions_default_batch_size = transition_batch_size
         self.transitions_real_batch_size = 0
@@ -263,7 +263,7 @@ class QLSTMGSCALE(object):
         
         train_X, train_y= self.get_train(transition_features.values)
         
-        history = self.lstm.fit(train_X, train_y,validation_split=0.2, epochs=n_epochs, batch_size=b_size, verbose=self.verbose, shuffle=False)
+        history = self.lstm.fit(train_X, train_y,validation_split=0, epochs=n_epochs, batch_size=b_size, verbose=self.verbose, shuffle=False)
         
         self.prepare_train_log_withou_val(history,train_X,train_y)
         self.LogLstmTrainHistoy()

@@ -219,7 +219,7 @@ class COMPERDDPG(object):
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
                                     verbose=True,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,
-                                    target_early_stopping=True,makes_transitions_shift=makes_transitions_shift)
+                                    target_early_stopping=False,makes_transitions_shift=makes_transitions_shift)
         
         ep_reward_list = []        
         log_itr=0
@@ -311,13 +311,13 @@ def grid_search():
     task_name="Pendulum-v1"
     tota_iterations=[100000]
     lstm_epochs=[15]
-    learningStartIter=[1]    
-    trainQTFreqquency=[1]    
-    update_QTCritic_frequency=[1]
-    q_lstm_bsize=[1000]
+    learningStartIter=[100000]    
+    trainQTFreqquency=[100000]    
+    update_QTCritic_frequency=[100000]
+    q_lstm_bsize=[100000]
     makes_transitions_shift=False
     update_critic_target_type=3
-    total_trails = 5
+    total_trails = 1
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
 
     for trial in range(1,(total_trails+1)):
