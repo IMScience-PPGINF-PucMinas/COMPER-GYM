@@ -259,7 +259,7 @@ class QLSTMGSCALE(object):
     def predict(self, input_transitions):
         self.training = False
         try:
-            transition_features = self.scaler.transform(input_transitions)            
+            transition_features = self.scaler.fit_transform(input_transitions)            
             transition_features = transition_features.reshape((transition_features.shape[0], 1, transition_features.shape[1]))
             predict_result = self.lstm.predict(transition_features)
             return predict_result

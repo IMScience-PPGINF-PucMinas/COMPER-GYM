@@ -143,9 +143,8 @@ class COMPERDDPG(object):
 
     #@tf.function
     def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
-        with tf.GradientTape() as tape:
-            e = self.epsilon.value(itr)
-            y = self.qt.predict(target_predicted)
+        with tf.GradientTape() as tape:           
+            y = reward_batch + self.gamma * self.qt.predict(target_predicted)
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
@@ -154,14 +153,16 @@ class COMPERDDPG(object):
 
     def update_critic_target2(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
         with tf.GradientTape() as tape:
-            e = self.epsilon.value(itr)                      
-            y =reward_batch + (1.0-e) * self.qt.predict(target_predicted)
-            y = self.qt.predict(target_predicted)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+            actions = self.actor_model.model(state_batch, training=True)
+            critic_value = self.critic_model.model([state_batch, actions], training=True)
+            # Used `-value` as we want to maximize the value given
+            # by the critic for our actions
+            y = reward_batch + self.gamma * self.qt.predict(target_predicted)
+            #actor_loss = -tf.math.reduce_mean(critic_value)
+            actor_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
+        actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
+        self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
     
     def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
         with tf.GradientTape() as tape:
@@ -234,7 +235,7 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
+                                    verbose=True,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
         
         ep_reward_list = []        
         log_itr=0
@@ -267,7 +268,7 @@ class COMPERDDPG(object):
                     first_qt_trained=True
                     self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
 
-                if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                    
+                if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                                    
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
                 
                 if((count >1) and (count % 5000 == 0)):
