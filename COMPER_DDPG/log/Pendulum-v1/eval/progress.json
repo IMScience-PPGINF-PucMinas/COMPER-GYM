@@ -1,1 +1,6 @@
-{"Trial": 1, "Time": "29-03-2023 18:58:00", "Task": "Pendulum-v1", "Int": 5000, "EvalAvgRew": -612.1203531349762}
+{"Trial": 3, "Time": "30-03-2023 04:14:44", "Task": "Pendulum-v1", "Int": 5000, "EvalAvgRew": -121.39465777678166}
+{"Trial": 3, "Time": "30-03-2023 07:09:53", "Task": "Pendulum-v1", "Int": 10000, "EvalAvgRew": -0.6156771280768486}
+{"Trial": 3, "Time": "30-03-2023 10:04:37", "Task": "Pendulum-v1", "Int": 15000, "EvalAvgRew": -1.7882474678278293}
+{"Trial": 3, "Time": "30-03-2023 13:02:16", "Task": "Pendulum-v1", "Int": 20000, "EvalAvgRew": -227.02885767209784}
+{"Trial": 3, "Time": "30-03-2023 16:02:16", "Task": "Pendulum-v1", "Int": 25000, "EvalAvgRew": -121.92853994787157}
+{"Trial": 3, "Time": "30-03-2023 19:01:48", "Task": "Pendulum-v1", "Int": 30000, "EvalAvgRew": -112.40775194592939}

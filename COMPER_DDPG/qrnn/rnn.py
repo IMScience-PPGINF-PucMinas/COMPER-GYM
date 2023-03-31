@@ -35,12 +35,9 @@ class RNN(object):
     def create_lstm(self):
         last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
         self.lstm = Sequential()                
-        self.optimizer=='adam'
-        #self.lstm.add(LSTM(128,return_sequences=True,stateful=False,input_shape=(self.inputshapex,self.inputshapey),activation='tanh'))
-        #self.lstm.add(LSTM(128,return_sequences=True,activation='tanh'))
-        self.lstm.add(LSTM(32,activation='tanh',input_shape=(self.inputshapex,self.inputshapey)))                
-        self.lstm.add(Dense(256,activation="relu"))
-        self.lstm.add(Dense(256,activation="relu"))                             
+        self.lstm.add(LSTM(64,return_sequences=True,stateful=False,input_shape=(self.inputshapex,self.inputshapey),activation='tanh'))
+        self.lstm.add(LSTM(64,return_sequences=False,activation='tanh'))
+        self.lstm.add(Dense(32,activation='relu'))              
         self.lstm.add(Dense(1,kernel_initializer=last_init))
 
          
