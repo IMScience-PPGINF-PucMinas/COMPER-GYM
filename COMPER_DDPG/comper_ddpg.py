@@ -288,7 +288,9 @@ class COMPERDDPG(object):
             print("Episode * {} * Avg Reward is ==> {}".format(ep, np.mean(ep_reward_list[-40:])))
             e =(1.0- self.epsilon.value(count))
             avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
-            avg_10_trial_rew = np.mean(ep_reward_list[-40:]) if len(ep_reward_list)>0 else 0
+            avg_100_trial_rew = np.mean(ep_reward_list[-100:]) if len(ep_reward_list)>0 else 0
+            avg_40_trial_rew = np.mean(ep_reward_list[-40:]) if len(ep_reward_list)>0 else 0
+            avg_10_trial_rew = np.mean(ep_reward_list[-10:]) if len(ep_reward_list)>0 else 0
             log_itr+=1
             now = datetime.now()        
             dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
@@ -305,8 +307,11 @@ class COMPERDDPG(object):
             ('EpItr', itr),
             ("Done",done),
             ('EpRew', episodic_reward),                    
-            ('AvgLast100Ep', avg_trial_rew),
-            ('AvgLast10Ep', avg_10_trial_rew)]
+            ('AvgEp', avg_trial_rew),
+            ('Avg100Ep', avg_100_trial_rew),
+            ('AvgLast40Ep', avg_40_trial_rew),
+            ('AvgLast10Ep', avg_10_trial_rew)
+            ]
             self.train_log(log_data_dict)
 
 
