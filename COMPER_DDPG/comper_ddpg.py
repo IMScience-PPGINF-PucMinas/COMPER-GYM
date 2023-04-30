@@ -44,15 +44,17 @@ class COMPERDDPG(object):
         self.epsilonFinal = 0.001     
         self.epsilonFraction = 0.20099
 
-    def config_train_logger(self):    
-        logger.session(self.train_log_path).__enter__()        
+    def config_train_logger(self,trial):
+        trial_path="trial"+str(trial)+"/"    
+        logger.session(self.train_log_path+trial_path).__enter__()        
 
     def train_log(self,log_data_dict):
         for k, v in log_data_dict:
             logger.logkv(k, v)
         logger.dumpkvs()
 
-    def config_eval_logger(self):    
+    def config_eval_logger(self,trial):
+        trial_path = "trial"+str(trial)+"/"    
         e_logger.session(self.eval_log_path).__enter__()
 
     def eval_log(self,log_data_dict):
@@ -216,9 +218,9 @@ class COMPERDDPG(object):
     def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
         
         self.__schedule_epsilon()       
-        qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"    
-        self.config_train_logger()
-        self.config_eval_logger()
+        qlstm_log_path = "./log/"+self.task_name+"/train/trial"+str(trial)+"/lstm/"    
+        self.config_train_logger(trial)
+        self.config_eval_logger(trial)
         self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.task_name,self.env.num_states,self.env.num_actions)
 
@@ -283,36 +285,37 @@ class COMPERDDPG(object):
                 if done:            
                     run=False
                 prev_state = state
-
-            ep_reward_list.append(episodic_reward)                    
-            print("Episode * {} * Avg Reward is ==> {}".format(ep, np.mean(ep_reward_list[-40:])))
-            e =(1.0- self.epsilon.value(count))
-            avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
-            avg_100_trial_rew = np.mean(ep_reward_list[-100:]) if len(ep_reward_list)>0 else 0
-            avg_40_trial_rew = np.mean(ep_reward_list[-40:]) if len(ep_reward_list)>0 else 0
-            avg_10_trial_rew = np.mean(ep_reward_list[-10:]) if len(ep_reward_list)>0 else 0
-            log_itr+=1
-            now = datetime.now()        
-            dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-            log_data_dict =[
-            ("Trial",trial),
-            ('LogCount',log_itr),
-            ('Task',self.task_name),
-            ('Time',dt_string),
-            ('TotalItr',count),
-            ('TMCount',self.tm.__len__()),
-            ('RTMCount',self.rtm.__len__()),
-            ('e',e),
-            ('Ep', ep),
-            ('EpItr', itr),
-            ("Done",done),
-            ('EpRew', episodic_reward),                    
-            ('AvgEp', avg_trial_rew),
-            ('Avg100Ep', avg_100_trial_rew),
-            ('AvgLast40Ep', avg_40_trial_rew),
-            ('AvgLast10Ep', avg_10_trial_rew)
-            ]
-            self.train_log(log_data_dict)
+                
+                if(count % 200 == 0):
+                    ep_reward_list.append(episodic_reward)                    
+                    print("Episode * {} * Avg Reward is ==> {}".format(ep, np.mean(ep_reward_list[-50:])))
+                    e =(1.0- self.epsilon.value(count))
+                    avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
+                    avg_100_trial_rew = np.mean(ep_reward_list[-100:]) if len(ep_reward_list)>0 else 0
+                    avg_40_trial_rew = np.mean(ep_reward_list[-50:]) if len(ep_reward_list)>0 else 0
+                    avg_10_trial_rew = np.mean(ep_reward_list[-10:]) if len(ep_reward_list)>0 else 0
+                    log_itr+=1
+                    now = datetime.now()        
+                    dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+                    log_data_dict =[
+                    ("Trial",trial),
+                    ('LogCount',log_itr),
+                    ('Task',self.task_name),
+                    ('Time',dt_string),
+                    ('TotalItr',count),
+                    ('TMCount',self.tm.__len__()),
+                    ('RTMCount',self.rtm.__len__()),
+                    ('e',e),
+                    ('Ep', ep),
+                    ('EpItr', itr),
+                    ("Done",done),
+                    ('EpRew', episodic_reward),                    
+                    ('AvgEp', avg_trial_rew),
+                    ('Avg100Ep', avg_100_trial_rew),
+                    ('AvgLast50Ep', avg_40_trial_rew),
+                    ('AvgLast10Ep', avg_10_trial_rew)
+                    ]
+                    self.train_log(log_data_dict)
 
 
 def config_trial_logger(base_log_dir = "./log/trials/"):    
@@ -324,37 +327,39 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Pendulum-v1"
-    tota_iterations=[100000]
+    task_name="MountainCarContinuous-v0"
+    tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
-    q_lstm_bsize=[100000]    
+    q_lstm_bsize=[50000]    
     trial=2
+    max_trial =5
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
-
-    for tep in tota_iterations:
-        for lstmep in lstm_epochs:
-            for tqt in trainQTFreqquency:
-                for start in learningStartIter:
-                    for upcritic in update_QTCritic_frequency:
-                        for bs in q_lstm_bsize:                            
-                            now = datetime.now()
-                            dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
-                            log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),
-                            ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
-                            ('Qlstm_bs',bs)]
-                            trial_log(log_data_dict)
-                            agent = COMPERDDPG(task_name=task_name)
-                            agent.train(
-                                tota_iterations=tep,
-                                lstm_epochs=lstmep,
-                                trainQTFreqquency=tqt,
-                                learningStartIter= start,
-                                update_QTCritic_frequency=upcritic,
-                                q_lstm_bsize=bs,
-                                trial=trial)                        
+    while trial<=max_trial:
+        for tep in tota_iterations:
+            for lstmep in lstm_epochs:
+                for tqt in trainQTFreqquency:
+                    for start in learningStartIter:
+                        for upcritic in update_QTCritic_frequency:
+                            for bs in q_lstm_bsize:                            
+                                now = datetime.now()
+                                dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+                                log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),
+                                ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
+                                ('Qlstm_bs',bs)]
+                                trial_log(log_data_dict)
+                                agent = COMPERDDPG(task_name=task_name)
+                                agent.train(
+                                    tota_iterations=tep,
+                                    lstm_epochs=lstmep,
+                                    trainQTFreqquency=tqt,
+                                    learningStartIter= start,
+                                    update_QTCritic_frequency=upcritic,
+                                    q_lstm_bsize=bs,
+                                    trial=trial)
+        trial+=1                        
 
 def main():
     grid_search()
