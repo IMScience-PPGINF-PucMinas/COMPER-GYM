@@ -334,9 +334,10 @@ def grid_search():
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
-    trial=3
+    trial=5
     max_trial =5
     config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
+    agent=None
     while trial<=max_trial:
         for tep in tota_iterations:
             for lstmep in lstm_epochs:
