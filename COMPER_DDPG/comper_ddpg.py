@@ -19,7 +19,7 @@ from collections import deque
 import os
 from policy import Epsilon
 class COMPERDDPG(object):
-    def __init__(self,task_name = "Pendulum-v1") -> None:
+    def __init__(self,task_name = "Pendulum-v1",log_base_dir="log") -> None:
         super().__init__()
         self.task_name = task_name
         self.env = GymEnv(self.task_name)
@@ -35,11 +35,12 @@ class COMPERDDPG(object):
         self.gamma = 0.99       
         self.tau = 0.005#0.001
         self.noise_object = None
+        self.log_base_dir = log_base_dir
         self.critic_optimizer = tf.keras.optimizers.Adam(self.critic_lr)
         self.actor_optimizer = tf.keras.optimizers.Adam(self.actor_lr)
-        self.train_log_path = "./log/"+self.task_name+"/train/"
-        self.eval_log_path = "./log/"+self.task_name+"/eval/"
-        self.checkpoint_path = "./log/"+self.task_name+"/checkpoint/"
+        self.train_log_path = "./"+self.log_base_dir+"/"+self.task_name+"/train/"
+        self.eval_log_path = "./"+self.log_base_dir+"/"+self.task_name+"/eval/"
+        self.checkpoint_path = "./"+self.log_base_dir+"/"+self.task_name+"/checkpoint/"
         self.epsilonInitial = 1.0
         self.epsilonFinal = 0.001     
         self.epsilonFraction = 0.20099
@@ -218,7 +219,7 @@ class COMPERDDPG(object):
     def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
         
         self.__schedule_epsilon()       
-        qlstm_log_path = "./log/"+self.task_name+"/train/trial"+str(trial)+"/lstm/"    
+        qlstm_log_path = "./"+self.log_base_dir+"/"+self.task_name+"/train/trial"+str(trial)    
         self.config_train_logger(trial)
         self.config_eval_logger(trial)
         self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
@@ -331,12 +332,13 @@ def grid_search():
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
-    trainQTFreqquency=[1]    
-    update_QTCritic_frequency=[1]
+    trainQTFreqquency=[1000000000]    
+    update_QTCritic_frequency=[100000000000]
     q_lstm_bsize=[50000]    
-    trial=5
+    trial=1
     max_trial =5
-    config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
+    log_base_dir ="logddpg" 
+    config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
     while trial<=max_trial:
         for tep in tota_iterations:
@@ -351,7 +353,7 @@ def grid_search():
                                 ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
                                 ('Qlstm_bs',bs)]
                                 trial_log(log_data_dict)
-                                agent = COMPERDDPG(task_name=task_name)
+                                agent = COMPERDDPG(task_name=task_name,log_base_dir=log_base_dir)
                                 agent.train(
                                     tota_iterations=tep,
                                     lstm_epochs=lstmep,
