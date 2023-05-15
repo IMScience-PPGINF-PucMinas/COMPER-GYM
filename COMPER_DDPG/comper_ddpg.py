@@ -121,8 +121,8 @@ class COMPERDDPG(object):
             transitions_batch = self.tm.sample_transitions_batch(64)
         
         st_1,a,r,st,q,done = self._get_transition_components(transitions_batch)
-        a = np.array(a)
-        a = a.reshape(a.shape[0],1)
+        #a = np.array(a)
+        #a = a.reshape(a.shape[0],1)
         r = np.array(r)
         r = r.reshape(r.shape[0],1)
         state_batch = tf.convert_to_tensor(st_1)
@@ -238,7 +238,7 @@ class COMPERDDPG(object):
         #transitin_size = int((2*self.env.num_states + self.env.num_actions + 1))
         transitin_size=ft.T_LENGTH -2
         self.qt = QLSTMGSCALE(transitions_memory=self.tm,reduced_transitions_memory=self.rtm,inputshapex=1,inputshapey=transitin_size,outputdim=self.env.num_actions,
-                                    verbose=True,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
+                                    verbose=False,transition_batch_size=q_lstm_bsize,netparamsdir='dev',target_optimizer="rmsprop",log_dir=qlstm_log_path,target_early_stopping=True)
         
         ep_reward_list = []        
         log_itr=0
@@ -246,7 +246,8 @@ class COMPERDDPG(object):
         first_qt_trained = False
         ep=0
         while (count<=tota_iterations):
-            prev_state = self.env.reset()
+            #prev_state = self.env.reset()
+            prev_state = self.env.reset()[0]
             episodic_reward = 0
             itr = 1   
             run =True
@@ -255,13 +256,13 @@ class COMPERDDPG(object):
                 itr+=1
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound,self.noise_object)
-                state, reward, done, info = self.env.step(action)      
+                state, reward, done,truncate, info = self.env.step(action)      
                 
                 q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)]).numpy()
-                #action = np.array(action)
-                #action = action.reshape(action.shape[1])
-                a = np.array(action)
-                a = a.reshape(a.shape[0],1)
+                action = np.array(action)
+                action = action.reshape(action.shape[1])
+                #a = np.array(action)
+                #a = a.reshape(a.shape[0],1)
                 self.tm.add_transition(prev_state,action,reward,state,q,done)
                 episodic_reward += reward       
 
@@ -328,16 +329,16 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="MountainCarContinuous-v0"
+    task_name="Ant-v2"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
-    trainQTFreqquency=[1000000000]    
-    update_QTCritic_frequency=[100000000000]
+    trainQTFreqquency=[1]    
+    update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
     trial=1
-    max_trial =5
-    log_base_dir ="logddpg" 
+    max_trial =1
+    log_base_dir ="log" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
     while trial<=max_trial:
