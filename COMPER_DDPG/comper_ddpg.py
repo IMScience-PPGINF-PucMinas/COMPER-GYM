@@ -191,13 +191,13 @@ class COMPERDDPG(object):
         ep_reward_list = []
         for ep in range(n_episodes):
             ep_reward_list = []
-            prev_state = env.reset()
+            prev_state = env.reset()[0]
             episodic_reward = 0
             done=False        
             while not done:
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action_no_noise(tf_prev_state,self.actor_model.model,env.lower_bound,env.upper_bound)
-                state, reward, done, info = env.step(action)
+                state, reward, done, truncate, info = env.step(action)
                 episodic_reward += reward
                 prev_state = state
                 ep_reward_list.append(episodic_reward)
