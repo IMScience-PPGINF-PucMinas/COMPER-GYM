@@ -187,7 +187,7 @@ class COMPERDDPG(object):
             a.assign(b * tau + a * (1 - tau))
 
 
-    def evaluate(self,trial,iterations,n_episodes=10):
+    def evaluate(self,trial,iterations,n_episodes=10,max_eval_iterations=10.000):
         env = GymEnv(self.task_name)
         ep_reward_list = []
         self.count_evalutation+=1
@@ -196,9 +196,9 @@ class COMPERDDPG(object):
             ep_reward_list = []
             prev_state = env.reset()[0]
             episodic_reward = 0
-            done=False
-            truncate=False                  
-            while not done and not truncate:
+            done=False            
+            eval_iterations=1                  
+            while not done and eval_iterations<=max_eval_iterations:
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action_no_noise(tf_prev_state,self.actor_model.model,env.lower_bound,env.upper_bound)
                 state, reward, done, truncate, info = env.step(action)
@@ -289,8 +289,7 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if done or truncate:
-                    done=True            
+                if done:                                
                     run=False
                 prev_state = state
                 
