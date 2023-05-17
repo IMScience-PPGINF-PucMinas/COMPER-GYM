@@ -205,6 +205,7 @@ class COMPERDDPG(object):
                 episodic_reward += reward
                 prev_state = state
                 ep_reward_list.append(episodic_reward)
+                eval_iterations+=1
                 
         
         avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0

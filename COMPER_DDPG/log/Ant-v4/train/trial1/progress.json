@@ -1,0 +1,1 @@
+{"Trial": 1, "LogCount": 1, "Task": "Ant-v4", "Time": "17-05-2023 18:42:58", "TotalItr": 200, "TMCount": 0, "RTMCount": 200, "e": 0.009940793074282306, "Ep": 1, "EpItr": 201, "Done": false, "EpRew": 126.009057312562, "AvgEp": 126.009057312562, "Avg100Ep": 126.009057312562, "AvgLast50Ep": 126.009057312562, "AvgLast10Ep": 126.009057312562}
