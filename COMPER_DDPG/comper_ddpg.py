@@ -44,6 +44,7 @@ class COMPERDDPG(object):
         self.epsilonInitial = 1.0
         self.epsilonFinal = 0.001     
         self.epsilonFraction = 0.20099
+        self.count_evalutation=0
 
     def config_train_logger(self,trial):
         trial_path="trial"+str(trial)+"/"    
@@ -186,21 +187,25 @@ class COMPERDDPG(object):
             a.assign(b * tau + a * (1 - tau))
 
 
-    def evaluate(self,trial,iterations,n_episodes=10):
+    def evaluate(self,trial,iterations,n_episodes=10,n_iterations=200):
         env = GymEnv(self.task_name)
         ep_reward_list = []
+        self.count_evalutation+=1
+        print("Evaluate * {} * Count ==> {}".format(trial,self.count_evalutation))
         for ep in range(n_episodes):
             ep_reward_list = []
             prev_state = env.reset()[0]
             episodic_reward = 0
-            done=False        
-            while not done:
+            done=False
+            count_it=1        
+            while not done and not truncate and count_it<=n_iterations:
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action_no_noise(tf_prev_state,self.actor_model.model,env.lower_bound,env.upper_bound)
                 state, reward, done, truncate, info = env.step(action)
                 episodic_reward += reward
                 prev_state = state
                 ep_reward_list.append(episodic_reward)
+                count_it+=1
         
         avg_trial_rew = np.mean(ep_reward_list) if len(ep_reward_list)>0 else 0
         now = datetime.now()
@@ -284,7 +289,7 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if done:            
+                if done or truncate:            
                     run=False
                 prev_state = state
                 
@@ -329,7 +334,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Ant-v2"
+    task_name="Ant-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
