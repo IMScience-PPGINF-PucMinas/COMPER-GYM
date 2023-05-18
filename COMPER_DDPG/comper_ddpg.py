@@ -290,7 +290,8 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if done:                                
+                if done or count>=tota_iterations:
+                    done=True                                
                     run=False
                 prev_state = state
                 
@@ -338,13 +339,13 @@ def grid_search():
     task_name="Ant-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
-    learningStartIter=[1]    
-    trainQTFreqquency=[1]    
+    learningStartIter=[10000000000]    
+    trainQTFreqquency=[1000000000000]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
     trial=1
     max_trial =1
-    log_base_dir ="log" 
+    log_base_dir ="logddpg" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
     while trial<=max_trial:
