@@ -20,7 +20,7 @@ RUN echo "Set disable_coredump false" >> /etc/sudo.conf
 RUN sudo apt-get --assume-yes install libosmesa6-dev
 RUN sudo apt-get --assume-yes install libc-dev
 RUN sudo pip install patchelf
-RUN sudo apt-get --assume-yer install htop
+RUN sudo apt-get --assume-yes install htop
 # ********************************************************
 # * Anything else you want to do like clean up goes here *
 # ********************************************************
@@ -29,7 +29,9 @@ RUN sudo apt-get --assume-yer install htop
 USER $USERNAME
 WORKDIR /home/$USERNAME/COMPER-GYM
 COPY . .
+RUN 
 RUN sudo chown -R $USERNAME /home/$USERNAME/COMPER-GYM
+RUN git pull
 RUN sudo mv mujoco /home/$USERNAME/.mujoco
 #CMD export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/$USERNAME/.mujoco/mjpro150/bin
 #CMD export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/daniel/$USERNAME/mujoco210/bin
