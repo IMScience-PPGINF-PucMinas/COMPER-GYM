@@ -20,6 +20,7 @@ RUN echo "Set disable_coredump false" >> /etc/sudo.conf
 RUN sudo apt-get --assume-yes install libosmesa6-dev
 RUN sudo apt-get --assume-yes install libc-dev
 RUN sudo pip install patchelf
+RUN sudo apt-get --assume-yer install htop
 # ********************************************************
 # * Anything else you want to do like clean up goes here *
 # ********************************************************
@@ -35,7 +36,7 @@ RUN sudo mv mujoco /home/$USERNAME/.mujoco
 RUN pip install faiss-gpu
 RUN pip install gym
 #RUN pip install -U 'mujoco-py<1.50.2,>=1.50.1'
-run pip install -U 'mujoco-py<2.2,>=2.1'
+RUN pip install -U 'mujoco-py<2.2,>=2.1'
 #RUN pip install mujoco
 RUN pip install gym[mujoco]
 RUN echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/$USERNAME/.mujoco/mujoco210/bin" >> /home/$USERNAME/.bashrc

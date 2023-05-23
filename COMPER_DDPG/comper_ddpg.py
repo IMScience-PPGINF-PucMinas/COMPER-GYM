@@ -283,8 +283,8 @@ class COMPERDDPG(object):
                 
                 if((count >1) and (count % 5000 == 0)):
                     self.evaluate(trial,count)
-                    self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
-                    self.actor_model.save_weights(self.checkpoint_path)
+                    chkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
+                    self.actor_model.save_weights(chkpoint_path)
                 
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
