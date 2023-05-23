@@ -31,7 +31,6 @@ WORKDIR /home/$USERNAME/COMPER-GYM
 COPY . .
 RUN 
 RUN sudo chown -R $USERNAME /home/$USERNAME/COMPER-GYM
-RUN git pull
 RUN sudo mv mujoco /home/$USERNAME/.mujoco
 #CMD export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/$USERNAME/.mujoco/mjpro150/bin
 #CMD export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/daniel/$USERNAME/mujoco210/bin
