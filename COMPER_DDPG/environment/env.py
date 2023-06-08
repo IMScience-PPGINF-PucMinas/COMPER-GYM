@@ -57,7 +57,7 @@ class GymEnv(object):
     
     def step(self,action):
         action = np.array(action)
-        action = action[0]        
+        #action = action[0]        
         return self.gym_env.step(action)
 
     def reset(self):
