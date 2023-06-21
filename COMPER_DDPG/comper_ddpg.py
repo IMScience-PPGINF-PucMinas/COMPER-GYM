@@ -336,15 +336,15 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="InvertedDoublePendulum-v4"
+    task_name="InvertedPendulum-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
-    trial=5
-    max_trial =5
+    trial=2
+    max_trial =2
     log_base_dir ="log" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
