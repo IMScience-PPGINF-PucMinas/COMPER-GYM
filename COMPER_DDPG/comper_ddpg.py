@@ -291,7 +291,7 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if done or truncate or count>=tota_iterations:
+                if truncate or count>=tota_iterations:
                     done=True                                
                     run=False
                 prev_state = state
