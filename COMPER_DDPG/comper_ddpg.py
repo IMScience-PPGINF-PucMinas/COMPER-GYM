@@ -146,9 +146,9 @@ class COMPERDDPG(object):
         return state_batch, action_batch, reward_batch,next_state_batch,transitions
 
     #@tf.function
-    def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
+    def update_critic_target(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr,done):
         with tf.GradientTape() as tape:           
-            y = reward_batch + self.gamma * self.qt.predict(target_predicted)
+            y = reward_batch + self.gamma * (1-done)* self.qt.predict(target_predicted)
             critic_value = self.critic_model.model([state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
@@ -262,7 +262,8 @@ class COMPERDDPG(object):
                 itr+=1
                 tf_prev_state = tf.expand_dims(tf.convert_to_tensor(prev_state), 0)
                 action = policy.get_action(tf_prev_state,self.actor_model.model,self.env.lower_bound,self.env.upper_bound,self.noise_object)
-                state, reward, done,truncate, info = self.env.step(action)      
+                state, reward, done,truncate, info = self.env.step(action)
+                     
                 
                 q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)]).numpy()
                 #action = np.array(action)
@@ -279,7 +280,7 @@ class COMPERDDPG(object):
                     self.qt.train_q_prediction_withou_validation(n_epochs=lstm_epochs)
 
                 if(first_qt_trained and (count % update_QTCritic_frequency == 0) and (count > learningStartIter)):                                    
-                    self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
+                    self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count,done)
                 
                 if((count >1) and (count % 5000 == 0)):
                     self.evaluate(trial,count)
@@ -290,7 +291,7 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if done or count>=tota_iterations:
+                if done or truncate or count>=tota_iterations:
                     done=True                                
                     run=False
                 prev_state = state
@@ -343,8 +344,8 @@ def grid_search():
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
-    trial=1
-    max_trial =1
+    trial=6
+    max_trial =6
     log_base_dir ="log" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
