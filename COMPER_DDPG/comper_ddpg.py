@@ -266,10 +266,9 @@ class COMPERDDPG(object):
                      
                 
                 q = self.critic_model.model([tf.convert_to_tensor(tf_prev_state), tf.convert_to_tensor(action)]).numpy()
-                #action = np.array(action)
+                action = np.array(action)
                 #action = action.reshape(action.shape[1])
-                a = np.array(action)
-                a = a.reshape(a.shape[0],1)
+                action = action.flatten()
                 self.tm.add_transition(prev_state,action,reward,state,q,done)
                 episodic_reward += reward       
 
@@ -337,7 +336,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="InvertedPendulum-v4"
+    task_name="HalfCheetah-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
