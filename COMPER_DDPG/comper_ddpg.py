@@ -339,9 +339,9 @@ def grid_search():
     task_name="HalfCheetah-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
-    learningStartIter=[1000000000]    
-    trainQTFreqquency=[100000000000]    
-    update_QTCritic_frequency=[100000000]
+    learningStartIter=[1]    
+    trainQTFreqquency=[1]    
+    update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
     trial=1
     max_trial =5
