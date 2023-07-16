@@ -1,0 +1,10 @@
+{"Trial": 1, "Time": "15-07-2023 15:10:09", "Task": "Hopper-v2", "Int": 5000, "EvalAvgRew": 6.33930157514572}
+{"Trial": 1, "Time": "15-07-2023 17:46:21", "Task": "Hopper-v2", "Int": 10000, "EvalAvgRew": 6.474874770057428}
+{"Trial": 1, "Time": "15-07-2023 20:22:19", "Task": "Hopper-v2", "Int": 15000, "EvalAvgRew": 6.297579181571567}
+{"Trial": 1, "Time": "15-07-2023 22:58:44", "Task": "Hopper-v2", "Int": 20000, "EvalAvgRew": 6.381961190846072}
+{"Trial": 1, "Time": "16-07-2023 01:35:54", "Task": "Hopper-v2", "Int": 25000, "EvalAvgRew": 6.451136483911}
+{"Trial": 1, "Time": "16-07-2023 04:14:11", "Task": "Hopper-v2", "Int": 30000, "EvalAvgRew": 6.412912484052917}
+{"Trial": 1, "Time": "16-07-2023 06:53:00", "Task": "Hopper-v2", "Int": 35000, "EvalAvgRew": 6.3641162426601845}
+{"Trial": 1, "Time": "16-07-2023 09:31:02", "Task": "Hopper-v2", "Int": 40000, "EvalAvgRew": 6.425668658388695}
+{"Trial": 1, "Time": "16-07-2023 12:09:01", "Task": "Hopper-v2", "Int": 45000, "EvalAvgRew": 6.372070748238499}
+{"Trial": 1, "Time": "16-07-2023 14:48:38", "Task": "Hopper-v2", "Int": 50000, "EvalAvgRew": 6.387399374607014}

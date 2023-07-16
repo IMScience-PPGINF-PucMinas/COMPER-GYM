@@ -57,9 +57,9 @@ class GymEnv(object):
         #temp=0
     
     def step(self,action):
-        #action = np.array(action)
-        #action = action[0]       
-        return self.gym_env.step(action)
+        action = np.array(action)
+        action = action.flatten()        
+        return self.gym_env.step(action.flatten())
 
     def reset(self):
         return self.gym_env.reset()
