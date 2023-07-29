@@ -8,3 +8,13 @@
 {"Trial": 1, "Time": "26-07-2023 09:37:13", "Task": "Swimmer-v4", "Int": 40000, "EvalAvgRew": 2.306443095201399}
 {"Trial": 1, "Time": "26-07-2023 11:49:44", "Task": "Swimmer-v4", "Int": 45000, "EvalAvgRew": 1.4573449251215205}
 {"Trial": 1, "Time": "26-07-2023 14:03:07", "Task": "Swimmer-v4", "Int": 50000, "EvalAvgRew": 0.7588985660933814}
+{"Trial": 2, "Time": "27-07-2023 20:33:47", "Task": "Swimmer-v4", "Int": 5000, "EvalAvgRew": 1.415752232484208}
+{"Trial": 2, "Time": "28-07-2023 00:11:28", "Task": "Swimmer-v4", "Int": 10000, "EvalAvgRew": 1.0972088548829082}
+{"Trial": 2, "Time": "28-07-2023 03:53:41", "Task": "Swimmer-v4", "Int": 15000, "EvalAvgRew": 1.3615556195297196}
+{"Trial": 2, "Time": "28-07-2023 07:32:42", "Task": "Swimmer-v4", "Int": 20000, "EvalAvgRew": 1.4921058203468003}
+{"Trial": 2, "Time": "28-07-2023 11:13:20", "Task": "Swimmer-v4", "Int": 25000, "EvalAvgRew": 0.7102896838877759}
+{"Trial": 2, "Time": "28-07-2023 14:58:26", "Task": "Swimmer-v4", "Int": 30000, "EvalAvgRew": 1.1530558190033642}
+{"Trial": 2, "Time": "28-07-2023 18:45:38", "Task": "Swimmer-v4", "Int": 35000, "EvalAvgRew": 0.8642451977725919}
+{"Trial": 2, "Time": "28-07-2023 22:32:00", "Task": "Swimmer-v4", "Int": 40000, "EvalAvgRew": -0.025433588169443765}
+{"Trial": 2, "Time": "29-07-2023 02:12:58", "Task": "Swimmer-v4", "Int": 45000, "EvalAvgRew": 1.4582271730448908}
+{"Trial": 2, "Time": "29-07-2023 05:55:49", "Task": "Swimmer-v4", "Int": 50000, "EvalAvgRew": 0.8776762076676061}
