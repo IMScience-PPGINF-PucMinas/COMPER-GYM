@@ -1,0 +1,10 @@
+{"Trial": 3, "Time": "01-08-2023 14:10:58", "Task": "MountainCarContinuous-v0", "Int": 5000, "EvalAvgRew": -0.5499754635580525}
+{"Trial": 3, "Time": "01-08-2023 16:28:12", "Task": "MountainCarContinuous-v0", "Int": 10000, "EvalAvgRew": -0.006705670168178311}
+{"Trial": 3, "Time": "01-08-2023 18:46:05", "Task": "MountainCarContinuous-v0", "Int": 15000, "EvalAvgRew": -0.004677777527931139}
+{"Trial": 3, "Time": "01-08-2023 21:00:40", "Task": "MountainCarContinuous-v0", "Int": 20000, "EvalAvgRew": -0.3024926089025377}
+{"Trial": 3, "Time": "01-08-2023 23:12:20", "Task": "MountainCarContinuous-v0", "Int": 25000, "EvalAvgRew": -0.09770118054588124}
+{"Trial": 3, "Time": "02-08-2023 01:26:25", "Task": "MountainCarContinuous-v0", "Int": 30000, "EvalAvgRew": -0.037387631097691075}
+{"Trial": 3, "Time": "02-08-2023 03:39:45", "Task": "MountainCarContinuous-v0", "Int": 35000, "EvalAvgRew": -0.0007016509558492874}
+{"Trial": 3, "Time": "02-08-2023 05:56:45", "Task": "MountainCarContinuous-v0", "Int": 40000, "EvalAvgRew": -0.08216218187796327}
+{"Trial": 3, "Time": "02-08-2023 08:13:17", "Task": "MountainCarContinuous-v0", "Int": 45000, "EvalAvgRew": -0.02012478909143485}
+{"Trial": 3, "Time": "02-08-2023 10:30:22", "Task": "MountainCarContinuous-v0", "Int": 50000, "EvalAvgRew": -0.0009647076607546403}
