@@ -38,3 +38,13 @@
 {"Trial": 4, "Time": "03-08-2023 07:01:28", "Task": "Walker2d-v4", "Int": 40000, "EvalAvgRew": 6.083604935863649}
 {"Trial": 4, "Time": "03-08-2023 11:36:01", "Task": "Walker2d-v4", "Int": 45000, "EvalAvgRew": 6.306629758950899}
 {"Trial": 4, "Time": "03-08-2023 16:12:22", "Task": "Walker2d-v4", "Int": 50000, "EvalAvgRew": 6.358369558266912}
+{"Trial": 5, "Time": "04-08-2023 02:08:51", "Task": "Walker2d-v4", "Int": 5000, "EvalAvgRew": 5.698204174093336}
+{"Trial": 5, "Time": "04-08-2023 06:38:00", "Task": "Walker2d-v4", "Int": 10000, "EvalAvgRew": 5.782267935189806}
+{"Trial": 5, "Time": "04-08-2023 11:06:51", "Task": "Walker2d-v4", "Int": 15000, "EvalAvgRew": 6.055073116221661}
+{"Trial": 5, "Time": "04-08-2023 15:35:37", "Task": "Walker2d-v4", "Int": 20000, "EvalAvgRew": -4.756649235753164}
+{"Trial": 5, "Time": "04-08-2023 20:05:43", "Task": "Walker2d-v4", "Int": 25000, "EvalAvgRew": 1.9473445529456215}
+{"Trial": 5, "Time": "05-08-2023 00:35:19", "Task": "Walker2d-v4", "Int": 30000, "EvalAvgRew": 3.9603111925073433}
+{"Trial": 5, "Time": "05-08-2023 05:05:27", "Task": "Walker2d-v4", "Int": 35000, "EvalAvgRew": 4.651038342719326}
+{"Trial": 5, "Time": "05-08-2023 09:36:58", "Task": "Walker2d-v4", "Int": 40000, "EvalAvgRew": 4.510735430893452}
+{"Trial": 5, "Time": "05-08-2023 14:08:43", "Task": "Walker2d-v4", "Int": 45000, "EvalAvgRew": 5.601480283951343}
+{"Trial": 5, "Time": "05-08-2023 18:40:25", "Task": "Walker2d-v4", "Int": 50000, "EvalAvgRew": 4.876371074205468}
