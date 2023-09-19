@@ -290,7 +290,7 @@ class COMPERDDPG(object):
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
                     
                 count+=1
-                if truncate or count>=tota_iterations:
+                if done or count>=tota_iterations:
                     done=True                                
                     run=False
                 prev_state = state
@@ -336,15 +336,15 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Pendulum-v1"
+    task_name="MountainCarContinuous-v0"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
-    trial=5
-    max_trial =5
+    trial=7
+    max_trial =7
     log_base_dir ="log" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
