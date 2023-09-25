@@ -58,3 +58,13 @@
 {"Trial": 6, "Time": "13-09-2023 18:14:15", "Task": "InvertedDoublePendulum-v4", "Int": 40000, "EvalAvgRew": 51.333453969907964}
 {"Trial": 6, "Time": "13-09-2023 22:07:25", "Task": "InvertedDoublePendulum-v4", "Int": 45000, "EvalAvgRew": 51.40679123259017}
 {"Trial": 6, "Time": "14-09-2023 02:02:15", "Task": "InvertedDoublePendulum-v4", "Int": 50000, "EvalAvgRew": 51.3659117223066}
+{"Trial": 7, "Time": "24-09-2023 13:57:41", "Task": "InvertedDoublePendulum-v4", "Int": 5000, "EvalAvgRew": 22.384541533106574}
+{"Trial": 7, "Time": "24-09-2023 16:14:37", "Task": "InvertedDoublePendulum-v4", "Int": 10000, "EvalAvgRew": 27.527108710169706}
+{"Trial": 7, "Time": "24-09-2023 18:33:20", "Task": "InvertedDoublePendulum-v4", "Int": 15000, "EvalAvgRew": 22.91166908211541}
+{"Trial": 7, "Time": "24-09-2023 20:52:52", "Task": "InvertedDoublePendulum-v4", "Int": 20000, "EvalAvgRew": 41.60690639763101}
+{"Trial": 7, "Time": "24-09-2023 23:09:58", "Task": "InvertedDoublePendulum-v4", "Int": 25000, "EvalAvgRew": 41.61308665600295}
+{"Trial": 7, "Time": "25-09-2023 01:22:41", "Task": "InvertedDoublePendulum-v4", "Int": 30000, "EvalAvgRew": 22.434955931545254}
+{"Trial": 7, "Time": "25-09-2023 03:36:11", "Task": "InvertedDoublePendulum-v4", "Int": 35000, "EvalAvgRew": 22.41856330975837}
+{"Trial": 7, "Time": "25-09-2023 05:50:39", "Task": "InvertedDoublePendulum-v4", "Int": 40000, "EvalAvgRew": 18.135969978799753}
+{"Trial": 7, "Time": "25-09-2023 08:06:16", "Task": "InvertedDoublePendulum-v4", "Int": 45000, "EvalAvgRew": 22.504099771502396}
+{"Trial": 7, "Time": "25-09-2023 10:24:04", "Task": "InvertedDoublePendulum-v4", "Int": 50000, "EvalAvgRew": 22.562379832107958}
