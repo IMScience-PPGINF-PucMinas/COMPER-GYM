@@ -336,7 +336,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="MountainCarContinuous-v0"
+    task_name="InvertedDoublePendulum-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[1]    
