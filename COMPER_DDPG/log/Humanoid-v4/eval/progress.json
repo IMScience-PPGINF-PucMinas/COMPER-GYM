@@ -58,3 +58,13 @@
 {"Trial": 6, "Time": "27-09-2023 19:25:33", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.070348618483763}
 {"Trial": 6, "Time": "28-09-2023 03:43:04", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.065983739279318}
 {"Trial": 6, "Time": "28-09-2023 12:24:01", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 25.958894159887716}
+{"Trial": 7, "Time": "29-09-2023 00:05:15", "Task": "Humanoid-v4", "Int": 5000, "EvalAvgRew": 26.05270154325272}
+{"Trial": 7, "Time": "29-09-2023 05:33:57", "Task": "Humanoid-v4", "Int": 10000, "EvalAvgRew": 26.06762879771822}
+{"Trial": 7, "Time": "29-09-2023 11:30:54", "Task": "Humanoid-v4", "Int": 15000, "EvalAvgRew": 26.185845171133984}
+{"Trial": 7, "Time": "29-09-2023 18:00:49", "Task": "Humanoid-v4", "Int": 20000, "EvalAvgRew": 26.18117332541009}
+{"Trial": 7, "Time": "30-09-2023 00:57:22", "Task": "Humanoid-v4", "Int": 25000, "EvalAvgRew": 26.175281837244228}
+{"Trial": 7, "Time": "30-09-2023 08:15:39", "Task": "Humanoid-v4", "Int": 30000, "EvalAvgRew": 26.142264865651356}
+{"Trial": 7, "Time": "30-09-2023 15:59:29", "Task": "Humanoid-v4", "Int": 35000, "EvalAvgRew": 26.21286854686689}
+{"Trial": 7, "Time": "01-10-2023 00:07:08", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.175811452283654}
+{"Trial": 7, "Time": "01-10-2023 08:37:03", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.217230985566026}
+{"Trial": 7, "Time": "01-10-2023 17:32:22", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 26.147078237580324}
