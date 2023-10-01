@@ -48,6 +48,16 @@
 {"Trial": 5, "Time": "24-07-2023 15:41:07", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 25.986974239344857}
 {"Trial": 5, "Time": "24-07-2023 19:59:24", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.005602222062}
 {"Trial": 5, "Time": "25-07-2023 00:35:30", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 26.061053405099578}
+{"Trial": 10, "Time": "27-09-2023 20:24:55", "Task": "Humanoid-v4", "Int": 5000, "EvalAvgRew": 26.06080381406995}
+{"Trial": 10, "Time": "27-09-2023 22:55:28", "Task": "Humanoid-v4", "Int": 10000, "EvalAvgRew": 25.950780202776038}
+{"Trial": 10, "Time": "28-09-2023 01:41:43", "Task": "Humanoid-v4", "Int": 15000, "EvalAvgRew": 26.055018525486084}
+{"Trial": 10, "Time": "28-09-2023 04:43:21", "Task": "Humanoid-v4", "Int": 20000, "EvalAvgRew": 25.96189047950923}
+{"Trial": 10, "Time": "28-09-2023 08:00:06", "Task": "Humanoid-v4", "Int": 25000, "EvalAvgRew": 26.00099397361057}
+{"Trial": 10, "Time": "28-09-2023 11:29:19", "Task": "Humanoid-v4", "Int": 30000, "EvalAvgRew": 25.983517558664545}
+{"Trial": 10, "Time": "28-09-2023 15:13:18", "Task": "Humanoid-v4", "Int": 35000, "EvalAvgRew": 26.041810392076247}
+{"Trial": 10, "Time": "28-09-2023 19:12:25", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.04934708488497}
+{"Trial": 10, "Time": "28-09-2023 23:27:13", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 25.94454441946932}
+{"Trial": 10, "Time": "29-09-2023 03:54:40", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 26.04474909325333}
 {"Trial": 6, "Time": "25-09-2023 21:00:08", "Task": "Humanoid-v4", "Int": 5000, "EvalAvgRew": 26.095132113016273}
 {"Trial": 6, "Time": "26-09-2023 02:18:23", "Task": "Humanoid-v4", "Int": 10000, "EvalAvgRew": 26.066892094807343}
 {"Trial": 6, "Time": "26-09-2023 08:11:46", "Task": "Humanoid-v4", "Int": 15000, "EvalAvgRew": 26.0525129863377}
@@ -58,6 +68,7 @@
 {"Trial": 6, "Time": "27-09-2023 19:25:33", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.070348618483763}
 {"Trial": 6, "Time": "28-09-2023 03:43:04", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.065983739279318}
 {"Trial": 6, "Time": "28-09-2023 12:24:01", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 25.958894159887716}
+<<<<<<< HEAD
 {"Trial": 7, "Time": "29-09-2023 00:05:15", "Task": "Humanoid-v4", "Int": 5000, "EvalAvgRew": 26.05270154325272}
 {"Trial": 7, "Time": "29-09-2023 05:33:57", "Task": "Humanoid-v4", "Int": 10000, "EvalAvgRew": 26.06762879771822}
 {"Trial": 7, "Time": "29-09-2023 11:30:54", "Task": "Humanoid-v4", "Int": 15000, "EvalAvgRew": 26.185845171133984}
@@ -68,3 +79,15 @@
 {"Trial": 7, "Time": "01-10-2023 00:07:08", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.175811452283654}
 {"Trial": 7, "Time": "01-10-2023 08:37:03", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.217230985566026}
 {"Trial": 7, "Time": "01-10-2023 17:32:22", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 26.147078237580324}
+=======
+{"Trial": 9, "Time": "29-09-2023 13:15:14", "Task": "Humanoid-v4", "Int": 5000, "EvalAvgRew": 26.09531361210872}
+{"Trial": 9, "Time": "29-09-2023 15:47:26", "Task": "Humanoid-v4", "Int": 10000, "EvalAvgRew": 25.943557244934176}
+{"Trial": 9, "Time": "29-09-2023 18:39:40", "Task": "Humanoid-v4", "Int": 15000, "EvalAvgRew": 26.19931720665496}
+{"Trial": 9, "Time": "29-09-2023 21:46:58", "Task": "Humanoid-v4", "Int": 20000, "EvalAvgRew": 25.88813450969597}
+{"Trial": 9, "Time": "30-09-2023 01:08:24", "Task": "Humanoid-v4", "Int": 25000, "EvalAvgRew": 26.081771716559153}
+{"Trial": 9, "Time": "30-09-2023 04:42:07", "Task": "Humanoid-v4", "Int": 30000, "EvalAvgRew": 25.94755487807592}
+{"Trial": 9, "Time": "30-09-2023 08:30:21", "Task": "Humanoid-v4", "Int": 35000, "EvalAvgRew": 26.013092874224707}
+{"Trial": 9, "Time": "30-09-2023 12:33:50", "Task": "Humanoid-v4", "Int": 40000, "EvalAvgRew": 26.047020225934432}
+{"Trial": 9, "Time": "30-09-2023 16:54:43", "Task": "Humanoid-v4", "Int": 45000, "EvalAvgRew": 26.000054941479853}
+{"Trial": 9, "Time": "30-09-2023 21:29:09", "Task": "Humanoid-v4", "Int": 50000, "EvalAvgRew": 25.986267605846074}
+>>>>>>> c4e059849682c10c5739d4132b01e88a317fa94f
