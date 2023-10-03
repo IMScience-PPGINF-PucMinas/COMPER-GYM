@@ -98,3 +98,13 @@
 {"Trial": 8, "Time": "28-09-2023 02:14:21", "Task": "HalfCheetah-v4", "Int": 40000, "EvalAvgRew": -3.6752020768285094}
 {"Trial": 8, "Time": "28-09-2023 05:47:33", "Task": "HalfCheetah-v4", "Int": 45000, "EvalAvgRew": -5.453019866872829}
 {"Trial": 8, "Time": "28-09-2023 09:27:56", "Task": "HalfCheetah-v4", "Int": 50000, "EvalAvgRew": -3.7957587420034975}
+{"Trial": 9, "Time": "28-09-2023 22:33:50", "Task": "HalfCheetah-v4", "Int": 5000, "EvalAvgRew": -1.5270643216183448}
+{"Trial": 9, "Time": "29-09-2023 02:21:25", "Task": "HalfCheetah-v4", "Int": 10000, "EvalAvgRew": 0.5417680957438987}
+{"Trial": 9, "Time": "29-09-2023 06:32:01", "Task": "HalfCheetah-v4", "Int": 15000, "EvalAvgRew": -1.1056546478452465}
+{"Trial": 9, "Time": "29-09-2023 10:39:34", "Task": "HalfCheetah-v4", "Int": 20000, "EvalAvgRew": -1.0495894261224497}
+{"Trial": 9, "Time": "29-09-2023 14:27:58", "Task": "HalfCheetah-v4", "Int": 25000, "EvalAvgRew": -1.1796490744656345}
+{"Trial": 9, "Time": "29-09-2023 18:11:44", "Task": "HalfCheetah-v4", "Int": 30000, "EvalAvgRew": -0.7270006148416777}
+{"Trial": 9, "Time": "29-09-2023 21:53:48", "Task": "HalfCheetah-v4", "Int": 35000, "EvalAvgRew": -3.5169593684363436}
+{"Trial": 9, "Time": "30-09-2023 01:36:12", "Task": "HalfCheetah-v4", "Int": 40000, "EvalAvgRew": -2.534364420470179}
+{"Trial": 9, "Time": "30-09-2023 05:20:29", "Task": "HalfCheetah-v4", "Int": 45000, "EvalAvgRew": -3.2343997428174824}
+{"Trial": 9, "Time": "30-09-2023 09:03:11", "Task": "HalfCheetah-v4", "Int": 50000, "EvalAvgRew": -1.9070273078481619}
