@@ -343,8 +343,8 @@ def grid_search():
     trainQTFreqquency=[1]    
     update_QTCritic_frequency=[1]
     q_lstm_bsize=[50000]    
-    trial=9
-    max_trial =9
+    trial=10
+    max_trial =10
     log_base_dir ="log" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
