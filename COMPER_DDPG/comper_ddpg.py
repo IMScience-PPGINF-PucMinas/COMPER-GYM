@@ -341,7 +341,7 @@ def grid_search():
     lstm_epochs=[15]
     learningStartIter=[100000]    
     trainQTFreqquency=[100000]    
-    update_QTCritic_frequency=[100000]
+    update_QTCritic_frequency=[1000000]
     q_lstm_bsize=[50000]    
     trial=6
     max_trial =10
