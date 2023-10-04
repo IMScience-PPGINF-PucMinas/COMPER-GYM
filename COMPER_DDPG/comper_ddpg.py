@@ -336,7 +336,7 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="HalfCheetah-v4"
+    task_name="Hopper-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[100000]    
