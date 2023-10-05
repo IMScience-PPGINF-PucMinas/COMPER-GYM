@@ -336,15 +336,15 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="MountainCarContinuous-v0"
+    task_name="Humanoid-v4"
     tota_iterations=[50000]
     lstm_epochs=[15]
     learningStartIter=[100000]    
     trainQTFreqquency=[100000]    
     update_QTCritic_frequency=[100000]
     q_lstm_bsize=[50000]    
-    trial=6
-    max_trial =10
+    trial=8
+    max_trial =8
     log_base_dir ="logddpg" 
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
