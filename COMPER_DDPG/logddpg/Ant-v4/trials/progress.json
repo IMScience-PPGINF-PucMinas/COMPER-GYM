@@ -3,3 +3,8 @@
 {"Trial": 3, "Time": "14-07-2023 16:38:03", "TotalEp": 50000, "Tqt": 100000000000, "Lstmep": 15, "StartLearn": 1000000000, "Upcritic": 100000000, "Qlstm_bs": 50000}
 {"Trial": 4, "Time": "14-07-2023 18:15:35", "TotalEp": 50000, "Tqt": 100000000000, "Lstmep": 15, "StartLearn": 1000000000, "Upcritic": 100000000, "Qlstm_bs": 50000}
 {"Trial": 5, "Time": "14-07-2023 19:53:10", "TotalEp": 50000, "Tqt": 100000000000, "Lstmep": 15, "StartLearn": 1000000000, "Upcritic": 100000000, "Qlstm_bs": 50000}
+{"Trial": 6, "Time": "04-10-2023 04:20:39", "TotalEp": 50000, "Tqt": 100000, "Lstmep": 15, "StartLearn": 100000, "Upcritic": 100000, "Qlstm_bs": 50000}
+{"Trial": 7, "Time": "04-10-2023 06:26:50", "TotalEp": 50000, "Tqt": 100000, "Lstmep": 15, "StartLearn": 100000, "Upcritic": 100000, "Qlstm_bs": 50000}
+{"Trial": 8, "Time": "04-10-2023 08:33:31", "TotalEp": 50000, "Tqt": 100000, "Lstmep": 15, "StartLearn": 100000, "Upcritic": 100000, "Qlstm_bs": 50000}
+{"Trial": 9, "Time": "04-10-2023 10:40:19", "TotalEp": 50000, "Tqt": 100000, "Lstmep": 15, "StartLearn": 100000, "Upcritic": 100000, "Qlstm_bs": 50000}
+{"Trial": 10, "Time": "04-10-2023 12:48:14", "TotalEp": 50000, "Tqt": 100000, "Lstmep": 15, "StartLearn": 100000, "Upcritic": 100000, "Qlstm_bs": 50000}
