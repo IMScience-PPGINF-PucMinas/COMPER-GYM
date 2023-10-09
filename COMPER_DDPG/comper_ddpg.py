@@ -345,7 +345,11 @@ def grid_search():
     q_lstm_bsize=[50000]    
     trial=9
     max_trial =9
+<<<<<<< HEAD
     log_base_dir ="log" 
+=======
+    log_base_dir ="logddpg" 
+>>>>>>> 9adf3c609be0605dc7ba954d607f2bd3dbe96ed7
     config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
     agent=None
     while trial<=max_trial:
