@@ -30,10 +30,10 @@ class COMPERDDPG(object):
         self.actor_model = object
         self.target_actor = object
         self.target_critic = object
-        self.critic_lr = 0.002#1e-3
-        self.actor_lr = 0.001#1e-4
+        self.critic_lr = 1e-3#0.002#1e-3
+        self.actor_lr = 1e-4#0.001
         self.gamma = 0.99       
-        self.tau = 0.005#0.001
+        self.tau = 0.001#0.005
         self.noise_object = None
         self.log_base_dir = log_base_dir
         self.critic_optimizer = tf.keras.optimizers.Adam(self.critic_lr)
@@ -80,9 +80,9 @@ class COMPERDDPG(object):
         # Training and updating Actor & Critic networks.
         # See Pseudo Code.
         with tf.GradientTape() as tape:
-            target_actions = self.target_actor.model(next_state_batch, training=True)
+            target_actions = self.target_actor.model(next_state_batch)
             y = reward_batch + self.gamma * self.target_critic.model([next_state_batch, target_actions], training=True)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_value = self.critic_model.model([state_batch, action_batch])
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
         critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
@@ -92,9 +92,20 @@ class COMPERDDPG(object):
             actions = self.actor_model.model(state_batch, training=True)
             critic_value = self.critic_model.model([state_batch, actions], training=True)
             actor_loss = -tf.math.reduce_mean(critic_value)
-
+            
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
+    
+       
+        
+    def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
+        with tf.GradientTape() as tape:                                 
+            y =reward_batch + self.gamma * self.qt.predict(target_predicted)            
+            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
+            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+
+        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
+        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
 
     def _get_transition_components(self,transitions):
         st_1 = transitions[:,:ft.T_IDX_ST_1[1]]
@@ -163,16 +174,9 @@ class COMPERDDPG(object):
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
         self.actor_optimizer.apply_gradients(zip(actor_grad, self.actor_model.model.trainable_variables))
     
-    def update_critic_target3(self,state_batch, action_batch, reward_batch, next_state_batch,target_predicted,itr):
-        with tf.GradientTape() as tape:
-            e = self.epsilon.value(itr)                      
-            y =reward_batch + self.gamma * self.qt.predict(target_predicted)
-            y = self.qt.predict(target_predicted)
-            critic_value = self.critic_model.model([state_batch, action_batch], training=True)
-            critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
+    def update_critic_target(self,state_batch, action_batch, reward_batch,next_state_batch,transitions,count,type=1):
+        self.update_critic_target3(state_batch, action_batch, reward_batch,next_state_batch,transitions,count)
 
-        critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
-        self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
 
     def update_target(self,target_weights, weights, tau):
         for (a, b) in zip(target_weights, weights):
@@ -212,14 +216,20 @@ class COMPERDDPG(object):
             ('EvalAvgRew',avg_trial_rew)]
         self.eval_log(log_data_dict)
 
-
-
-    def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1):
+    def train(self,tota_iterations=100,lstm_epochs=150,update_QTCritic_frequency=5,trainQTFreqquency=100,learningStartIter=1,q_lstm_bsize=1000,trial=1,
+            makes_transitions_shift=False,update_critic_target_type=1):
         
         self.__schedule_epsilon()       
+<<<<<<< HEAD
         qlstm_log_path = "./"+self.log_base_dir+"/"+self.task_name+"/train/trial"+str(trial)    
         self.config_train_logger(trial)
         self.config_eval_logger(trial)
+=======
+        qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"
+        self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"    
+        self.config_train_logger()
+        self.config_eval_logger()
+>>>>>>> dev
         self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.task_name,self.env.num_states,self.env.num_actions)
 
@@ -274,9 +284,14 @@ class COMPERDDPG(object):
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count,done)
                 
                 if((count >1) and (count % 5000 == 0)):
+<<<<<<< HEAD
                     self.evaluate(trial,count)
                     chkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
                     self.actor_model.save_weights(chkpoint_path)
+=======
+                    self.evaluate(trial,count)                    
+                    self.actor_model.save_weights(self.checkpoint_path+str(count)+"/")
+>>>>>>> dev
                 
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
@@ -328,32 +343,33 @@ def trial_log(log_data_dict):
         tl.dumpkvs()
 
 def grid_search():
-    task_name="Walker2d-v4"
-    tota_iterations=[50000]
+    task_name="Pendulum-v1"
+    tota_iterations=[100000]
     lstm_epochs=[15]
-    learningStartIter=[1]    
-    trainQTFreqquency=[1]    
-    update_QTCritic_frequency=[1]
-    q_lstm_bsize=[50000]    
-    trial=5
-    max_trial =5
-    log_base_dir ="log" 
-    config_trial_logger(base_log_dir = "./"+log_base_dir+"/"+task_name+"/trials/")
-    agent=None
-    while trial<=max_trial:
+    learningStartIter=[100000]    
+    trainQTFreqquency=[100000]    
+    update_QTCritic_frequency=[100000]
+    q_lstm_bsize=[100000]
+    makes_transitions_shift=False
+    update_critic_target_type=3
+    total_trails = 1
+    config_trial_logger(base_log_dir = "./log/"+task_name+"/trials/")
+
+    for trial in range(1,(total_trails+1)):
         for tep in tota_iterations:
             for lstmep in lstm_epochs:
                 for tqt in trainQTFreqquency:
                     for start in learningStartIter:
                         for upcritic in update_QTCritic_frequency:
-                            for bs in q_lstm_bsize:                            
+                            for bs in q_lstm_bsize:                                
                                 now = datetime.now()
                                 dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
                                 log_data_dict =[('Trial',trial),('Time',dt_string),('TotalEp',tep),
                                 ('Tqt',tqt),('Lstmep',lstmep),('StartLearn',start),('Upcritic',upcritic),
-                                ('Qlstm_bs',bs)]
+                                ('Qlstm_bs',bs),('ShiftTransitions',makes_transitions_shift),
+                                ('UpdateCriticTargetType',update_critic_target_type)]
                                 trial_log(log_data_dict)
-                                agent = COMPERDDPG(task_name=task_name,log_base_dir=log_base_dir)
+                                agent = COMPERDDPG(task_name=task_name)
                                 agent.train(
                                     tota_iterations=tep,
                                     lstm_epochs=lstmep,
@@ -361,8 +377,9 @@ def grid_search():
                                     learningStartIter= start,
                                     update_QTCritic_frequency=upcritic,
                                     q_lstm_bsize=bs,
-                                    trial=trial)
-        trial+=1                        
+                                    trial=trial,
+                                    makes_transitions_shift=makes_transitions_shift,
+                                    update_critic_target_type=update_critic_target_type)                        
 
 def main():
     #test_gym()
