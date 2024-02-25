@@ -16,7 +16,7 @@ class RNN(object):
         self.verbose =verbose
         self.optimizer = optimizer
         self.outputdim = output_dim
-        self.rms_prop_optimizer =RMSprop(learning_rate=0.001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
+        self.rms_prop_optimizer =RMSprop(learning_rate=0.0001) #tf.train.RMSPropOptimizer(learning_rate=0.00025)
         self.early_stopping_callback=None
         self.model_checkpoint_callback = None
         self.checkoint_path = "./"

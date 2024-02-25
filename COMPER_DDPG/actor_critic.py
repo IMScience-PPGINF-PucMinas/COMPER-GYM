@@ -1,4 +1,5 @@
 from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
 import tensorflow as tf
 from config.exceptions import ExceptionRunType
 from config import parameters as param
@@ -56,17 +57,30 @@ class Actor(BaseActorCritic):
     
     
     def create(self,num_states,upper_bound,num_actions):
-        last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
-        inputs = layers.Input(shape=(num_states,),name="actor_input")
-        inputs = layers.BatchNormalization(input_shape=(num_states,))(inputs)
-        out = layers.Dense(256, activation="relu",name="actor_dense_1")(inputs)
-        out = layers.BatchNormalization()(out)
-        out = layers.Dense(256, activation="relu",name="actor_dense_2")(out)
-        out = layers.BatchNormalization()(out)
-        outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)
-        # Our upper bound is 2.0 for Pendulum.
-        outputs = outputs * upper_bound
-        self.model = tf.keras.Model(inputs, outputs)
+        last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)        
+        self.model = Sequential([
+            layers.InputLayer(input_shape=(num_states,),name="actor_input"),
+            layers.BatchNormalization(),
+            layers.Dense(400, activation="relu",name="actor_dense_1"),
+            layers.BatchNormalization(),
+            layers.Dense(300, activation="relu",name="actor_dense_2"),
+            layers.BatchNormalization(),
+            layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")          
+            
+        ])   
+    
+    #def create(self,num_states,upper_bound,num_actions):
+    #    last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
+    #    inputs = layers.Input(shape=(num_states,),name="actor_input")
+    #    out = layers.BatchNormalization()(inputs)
+    #    out = layers.Dense(256, activation="relu",name="actor_dense_1")(out)
+    #    out = layers.BatchNormalization()(out)
+    #    out = layers.Dense(256, activation="relu",name="actor_dense_2")(out)
+    #    out = layers.BatchNormalization()(out)
+    #    outputs = layers.Dense(num_actions, activation="tanh", kernel_initializer=last_init,name="actor_output")(out)
+    #    # Our upper bound is 2.0 for Pendulum.
+    #    outputs = outputs * upper_bound
+    #    self.model = tf.keras.Model(inputs, outputs)
 
     def compile_model(self):
         try:
@@ -85,29 +99,48 @@ class Critic(BaseActorCritic):
         self.create(num_states,num_actions)
         #self.compile_model()
     
+    
     def create(self,num_states,num_actions):
-        # State as input        
-         # State as input
+        # State as input                 
         state_input = layers.Input(shape=(num_states),name="critic_st_input")
-        state_input = layers.BatchNormalization(input_shape=(num_states,))(state_input)
-        state_out = layers.Dense(16, activation="relu",name="critic_st_dense1")(state_input)
+        state_out = layers.BatchNormalization()(state_input)
+        state_out = layers.Dense(400, activation="relu",name="critic_st_dense1")(state_input)
         state_out = layers.BatchNormalization()(state_out)
-        state_out = layers.Dense(32, activation="relu",name="critic_st_dense2")(state_out)
-        state_out = layers.BatchNormalization()(state_out)
+        state_out = layers.Dense(300, activation="relu",name="critic_st_dense2")(state_out)
 
         # Action as input
-        action_input = layers.Input(shape=(num_actions),name="critic_act_input")
-        action_out = layers.Dense(32, activation="relu",name="critic_act_dense1")(action_input)
+        action_input = layers.Input(shape=(num_actions),name="critic_act_input")       
 
         # Both are passed through seperate layer before concatenating
-        concat = layers.Concatenate()([state_out, action_out])
-
-        out = layers.Dense(256, activation="relu",name="critic_dense2")(concat)
-        out = layers.Dense(256, activation="relu",name="critic_dense3")(out)
-        outputs = layers.Dense(1,name="critic_output")(out)
-
+        concat = layers.Concatenate()([state_out, action_input])       
+        outputs = layers.Dense(1,name="critic_output")(concat)
         # Outputs single value for give state-action
         self.model = tf.keras.Model([state_input, action_input], outputs)
+
+    
+    
+    
+    #def create(self,num_states,num_actions):
+    #    # State as input                 
+    #    state_input = layers.Input(shape=(num_states),name="critic_st_input")
+    #    state_out = layers.BatchNormalization()(state_input)
+    #    state_out = layers.Dense(16, activation="relu",name="critic_st_dense1")(state_input)
+    #    state_out = layers.BatchNormalization()(state_out)
+    #    state_out = layers.Dense(32, activation="relu",name="critic_st_dense2")(state_out)
+
+    #    # Action as input
+    #    action_input = layers.Input(shape=(num_actions),name="critic_act_input")
+    #    action_out = layers.Dense(32, activation="relu",name="critic_act_dense1")(action_input)
+
+        # Both are passed through seperate layer before concatenating
+    #    concat = layers.Concatenate()([state_out, action_out])
+
+    #    out = layers.Dense(256, activation="relu",name="critic_dense2")(concat)
+    #    out = layers.Dense(256, activation="relu",name="critic_dense3")(out)
+    #    outputs = layers.Dense(1,name="critic_output")(out)
+
+        # Outputs single value for give state-action
+    #    self.model = tf.keras.Model([state_input, action_input], outputs)
 
     def compile_model(self):
         try:
