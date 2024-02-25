@@ -340,12 +340,12 @@ def trial_log(log_data_dict):
 
 def grid_search():
     task_name="Pendulum-v1"
-    tota_iterations=[100000]
+    tota_iterations=[50000]
     lstm_epochs=[15]
-    learningStartIter=[100000]    
-    trainQTFreqquency=[100000]    
-    update_QTCritic_frequency=[100000]
-    q_lstm_bsize=[100000]
+    learningStartIter=[1]    
+    trainQTFreqquency=[1]    
+    update_QTCritic_frequency=[1]
+    q_lstm_bsize=[50000]  
     makes_transitions_shift=False
     update_critic_target_type=3
     total_trails = 1
