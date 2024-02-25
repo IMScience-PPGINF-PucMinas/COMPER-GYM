@@ -1,7 +1,7 @@
 import gym
+from sqlalchemy import false
 import tensorflow as tf
 import numpy as np
-#import matplotlib.pyplot as plt
 from config import transitions
 import actor_critic
 import policy
@@ -91,8 +91,6 @@ class COMPERDDPG(object):
         with tf.GradientTape() as tape:
             actions = self.actor_model.model(state_batch, training=True)
             critic_value = self.critic_model.model([state_batch, actions], training=True)
-            # Used `-value` as we want to maximize the value given
-            # by the critic for our actions
             actor_loss = -tf.math.reduce_mean(critic_value)
 
         actor_grad = tape.gradient(actor_loss, self.actor_model.model.trainable_variables)
@@ -117,7 +115,7 @@ class COMPERDDPG(object):
     def comput_loss_and_update2(self):
         transitions_batch=[]   
         if(self.rtm. __len__()>0):
-            transitions_batch = self.rtm.sample_transitions_batch(64)
+            transitions_batch = self.rtm.sample_transitions_batch(100)
         else:
             transitions_batch = self.tm.sample_transitions_batch(64)
         
@@ -132,14 +130,11 @@ class COMPERDDPG(object):
         reward_batch = tf.cast(reward_batch, dtype=tf.float32)
         next_state_batch = tf.convert_to_tensor(st)
 
-        self.update_actor_critic_nets2(state_batch, action_batch, reward_batch,next_state_batch)
+        self.update_actor_critic_nets(state_batch, action_batch, reward_batch,next_state_batch)
 
-        transitions = transitions_batch[:,:-2]            
-        #target_predicted = qt.predict(transitions)
-        #transitions = transitions.reshape(transitions.shape[0],1,transitions.shape[1])
-        
-
+        transitions = transitions_batch[:,:-2]
         critic_value = self.critic_model.model([state_batch, action_batch], training=True).numpy()
+
         for i in range(len(st_1)):                 
             self.tm.add_transition(st_1[i],a[i],r[i],st[i],critic_value[i],float(done[i]))
         
@@ -179,9 +174,6 @@ class COMPERDDPG(object):
         critic_grad = tape.gradient(critic_loss, self.critic_model.model.trainable_variables)
         self.critic_optimizer.apply_gradients(zip(critic_grad, self.critic_model.model.trainable_variables))
 
-    # This update target parameters slowly
-    # Based on rate `tau`, which is much less than one.
-    #@tf.function
     def update_target(self,target_weights, weights, tau):
         for (a, b) in zip(target_weights, weights):
             a.assign(b * tau + a * (1 - tau))
@@ -248,7 +240,7 @@ class COMPERDDPG(object):
         
         ep_reward_list = []        
         log_itr=0
-        count=0
+        
         first_qt_trained = False
         ep=0
         while (count<=tota_iterations):
@@ -373,6 +365,7 @@ def grid_search():
         trial+=1                        
 
 def main():
+    #test_gym()
     grid_search()
 
 if __name__ == "__main__":

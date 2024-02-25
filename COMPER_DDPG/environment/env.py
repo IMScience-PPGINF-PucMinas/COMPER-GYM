@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 from config.transitions import FrameTransition as ft
 import numpy as np
 
