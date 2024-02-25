@@ -220,16 +220,10 @@ class COMPERDDPG(object):
             makes_transitions_shift=False,update_critic_target_type=1):
         
         self.__schedule_epsilon()       
-<<<<<<< HEAD
-        qlstm_log_path = "./"+self.log_base_dir+"/"+self.task_name+"/train/trial"+str(trial)    
-        self.config_train_logger(trial)
-        self.config_eval_logger(trial)
-=======
         qlstm_log_path = "./log/"+self.task_name+"/train/lstm/"
         self.checkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"    
         self.config_train_logger()
         self.config_eval_logger()
->>>>>>> dev
         self.actor_model = actor_critic.get_actor(self.task_name,self.env.num_states,self.env.upper_bound,self.env.num_actions)
         self.critic_model = actor_critic.get_critic(self.task_name,self.env.num_states,self.env.num_actions)
 
@@ -284,14 +278,9 @@ class COMPERDDPG(object):
                     self.update_critic_target(state_batch, action_batch, reward_batch,next_state_batch,transitions,count,done)
                 
                 if((count >1) and (count % 5000 == 0)):
-<<<<<<< HEAD
                     self.evaluate(trial,count)
                     chkpoint_path = self.checkpoint_path+"trail"+str(trial)+"/"
                     self.actor_model.save_weights(chkpoint_path)
-=======
-                    self.evaluate(trial,count)                    
-                    self.actor_model.save_weights(self.checkpoint_path+str(count)+"/")
->>>>>>> dev
                 
                 self.update_target(self.target_actor.model.variables, self.actor_model.model.variables, self.tau)
                 self.update_target(self.target_critic.model.variables, self.critic_model.model.variables, self.tau)
